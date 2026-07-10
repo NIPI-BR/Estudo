@@ -296,7 +296,7 @@ function setJpMode(m){DB.settings.jpMode=m;save();
    CURRÍCULO POR NÍVEL — CEFR / JLPT / TOPIK
    f=termo, b=tradução PT, r=leitura (japonês)
    ========================================================= */
-const CURRICULUM={
+let CURRICULUM={
   en:{framework:'CEFR',levels:[
     {id:'A1',label:'A1',desc:'Iniciante — frases básicas do dia a dia.',grammar:['verbo to be','presente simples','plural com -s'],core:[
       {f:'hello',b:'olá'},{f:'water',b:'água'},{f:'house',b:'casa'},{f:'to eat',b:'comer'},{f:'big',b:'grande'},{f:'friend',b:'amigo'},{f:'day',b:'dia'},{f:'good',b:'bom'}]},
@@ -352,6 +352,56 @@ const CURRICULUM={
       {f:'보편적',b:'universal'},{f:'덧없다',b:'efêmero'},{f:'꼼꼼하다',b:'meticuloso'},{f:'패러다임',b:'paradigma'},{f:'난해하다',b:'difícil de entender'},{f:'솔직함',b:'franqueza'},{f:'모호하다',b:'ambíguo'},{f:'현저하다',b:'notável'}]},
   ]},
 };
+let CONTENT_META={schema:0,source:'embutido',loaded:[]};
+let MANIFEST=null;
+const CONTENT_DIR='content/';
+
+/* Carrega o manifesto (leve). Os idiomas vêm sob demanda. */
+async function loadContent(){
+  try{
+    const res=await fetch(CONTENT_DIR+'index.json?v='+Date.now());
+    if(!res.ok)throw 0;
+    const m=await res.json();
+    if(m&&Array.isArray(m.languages)&&m.languages.length){
+      MANIFEST=m;
+      CONTENT_META={schema:m.schema||2,source:'content/',updated:m.updated||'',loaded:[]};
+    }
+  }catch(e){/* fallback: núcleo embutido */}
+}
+
+/* Busca o JSON de um idioma e o injeta no CURRICULUM (uma vez). */
+const _langFetching={};
+async function ensureLangContent(code){
+  if(!code||!MANIFEST)return false;
+  if(CONTENT_META.loaded.includes(code))return true;
+  if(_langFetching[code])return _langFetching[code];
+  const entry=MANIFEST.languages.find(x=>x.code===code);
+  if(!entry)return false;
+  _langFetching[code]=(async()=>{
+    try{
+      const res=await fetch(CONTENT_DIR+entry.file+'?v='+(entry.version||1));
+      if(!res.ok)throw 0;
+      const d=await res.json();
+      if(d&&Array.isArray(d.levels)&&d.levels.length){
+        CURRICULUM[code]={framework:d.framework||entry.framework||'',levels:d.levels};
+        if(!CONTENT_META.loaded.includes(code))CONTENT_META.loaded.push(code);
+        return true;
+      }
+    }catch(e){}
+    return false;
+  })();
+  const ok=await _langFetching[code];
+  delete _langFetching[code];
+  return ok;
+}
+
+/* Garante o conteúdo do idioma ativo antes de abrir telas que dependem dele. */
+async function withLangContent(fn){
+  const code=langKey(curLang());
+  if(code)await ensureLangContent(code);
+  fn();
+}
+
 function langKey(l){const c=langCode(l);return ['en','es','ja','ko'].includes(c)?c:''}
 function curCurriculum(){const k=langKey(curLang());return CURRICULUM[k]||null}
 function levelById(curr,id){return curr?curr.levels.find(x=>x.id===id):null}
@@ -431,7 +481,7 @@ function seed(){
       ]),
     ],
     stats:{log:{}}, // {data:{cards:n, quiz:n}}
-    settings:{aiEndpoint:'',catalogEndpoint:'',country:'BR',providers:[],jpMode:'romaji'}
+    settings:{aiEndpoint:'',catalogEndpoint:'',musicEndpoint:'',country:'BR',providers:[],jpMode:'romaji'}
   };
 }
 function lang(name,flag,vocab,grammar,songs){return {id:uid(),name,flag,vocab,grammar,songs:songs||[],films:[]}}
@@ -461,7 +511,7 @@ function boot(){
   DB = load();
   if(DB&&DB.languages){DB.languages.forEach(l=>{if(!l.songs)l.songs=[];if(!l.films)l.films=[]});}
   if(DB&&!DB.settings)DB.settings={};
-  if(DB&&DB.settings){const s=DB.settings;if(s.aiEndpoint==null)s.aiEndpoint='';if(s.catalogEndpoint==null)s.catalogEndpoint='';if(!s.country)s.country='BR';if(!Array.isArray(s.providers))s.providers=[];if(!s.jpMode)s.jpMode='romaji';}
+  if(DB&&DB.settings){const s=DB.settings;if(s.aiEndpoint==null)s.aiEndpoint='';if(s.catalogEndpoint==null)s.catalogEndpoint='';if(s.musicEndpoint==null)s.musicEndpoint='';if(!s.country)s.country='BR';if(!Array.isArray(s.providers))s.providers=[];if(!s.jpMode)s.jpMode='romaji';}
   if(DB&&DB.languages)backfillReadings();
   if(!DB || !DB.languages || !DB.learner.name){
     DB = DB || seed();
@@ -917,6 +967,12 @@ function renderDataAdmin(){
   const body=document.getElementById('manageBody');
   body.innerHTML=`
     <div class="card pad" style="margin-bottom:14px">
+      <h3 style="font-size:1.1rem;color:var(--petrol);margin-bottom:6px">Banco de conteúdo</h3>
+      <p class="muted" style="font-size:.88rem">Um arquivo por idioma em <code>content/</code>, carregado sob demanda.</p>
+      <p class="muted" style="font-size:.8rem;margin-top:8px">Origem: <b>${CONTENT_META.source}</b>${CONTENT_META.updated?` • ${CONTENT_META.updated}`:''}${CONTENT_META.source==='embutido'?' <span style="color:var(--warn)">(manifesto não carregado — usando núcleo interno)</span>':''}</p>
+      ${MANIFEST?`<div style="margin-top:10px">${MANIFEST.languages.map(x=>`<span class="badge" style="margin:2px 4px 2px 0;background:${CONTENT_META.loaded.includes(x.code)?'#e7f4ed':'#efe9d8'}">${x.flag} ${esc(x.name)} v${x.version}${CONTENT_META.loaded.includes(x.code)?' ✓':''}</span>`).join('')}</div>`:''}
+    </div>
+    <div class="card pad" style="margin-bottom:14px">
       <h3 style="font-size:1.1rem;color:var(--petrol);margin-bottom:6px">Conectar IA (opcional)</h3>
       <p class="muted" style="font-size:.88rem;margin-bottom:12px">Para ligar o tutor, a tradução de letras e a geração de flashcards no GitHub Pages, cole aqui a URL do seu backend (ex.: Cloudflare Worker). Deixe em branco para usar só no preview do claude.ai.</p>
       <label class="field"><span>Endpoint da IA</span>
@@ -938,6 +994,17 @@ function renderDataAdmin(){
       </div>
       <p class="muted" style="font-size:.74rem;margin-top:8px">Status: ${DB.settings.catalogEndpoint?'<b style="color:var(--ok)">conectado</b>':'não conectado'}</p>
     </div>
+    <div class="card pad" style="margin-bottom:14px">
+      <h3 style="font-size:1.1rem;color:var(--petrol);margin-bottom:6px">Conectar busca de música</h3>
+      <p class="muted" style="font-size:.88rem;margin-bottom:12px">Para preencher música, link do YouTube e (se você ativar um provedor) a letra automaticamente. Cole a URL <code>/music</code> do seu backend.</p>
+      <label class="field"><span>Endpoint de música</span>
+        <input id="musEndpoint" class="input" value="${esc(DB.settings.musicEndpoint||'')}" placeholder="https://seu-worker.workers.dev/music"></label>
+      <div style="display:flex;gap:8px">
+        <button class="btn block" onclick="saveMusEndpoint()">Salvar endpoint</button>
+        ${DB.settings.musicEndpoint?'<button class="btn ghost" onclick="DB.settings.musicEndpoint=\'\';save();renderManage();toast(\'Música desconectada\')">Limpar</button>':''}
+      </div>
+      <p class="muted" style="font-size:.74rem;margin-top:8px">Status: ${DB.settings.musicEndpoint?'<b style="color:var(--ok)">conectado</b>':'não conectado'}</p>
+    </div>
     <div class="card pad">
       <h3 style="font-size:1.1rem;color:var(--petrol);margin-bottom:6px">Backup e restauração</h3>
       <p class="muted" style="font-size:.88rem;margin-bottom:14px">Seu progresso fica salvo neste navegador. Exporte para guardar ou transferir.</p>
@@ -957,6 +1024,10 @@ function saveEndpoint(){
 function saveCatEndpoint(){
   DB.settings.catalogEndpoint=document.getElementById('catEndpoint').value.trim();
   save();renderManage();toast(DB.settings.catalogEndpoint?'Catálogo conectado':'Endpoint salvo');
+}
+function saveMusEndpoint(){
+  DB.settings.musicEndpoint=document.getElementById('musEndpoint').value.trim();
+  save();renderManage();toast(DB.settings.musicEndpoint?'Música conectada':'Endpoint salvo');
 }
 
 /* ---- modais de edição ---- */
@@ -1065,7 +1136,7 @@ function importData(input){
   r.onload=()=>{try{const d=JSON.parse(r.result);
     if(!d.languages)throw 0;
     if(!d.settings)d.settings={};
-    {const s=d.settings;if(s.aiEndpoint==null)s.aiEndpoint='';if(s.catalogEndpoint==null)s.catalogEndpoint='';if(!s.country)s.country='BR';if(!Array.isArray(s.providers))s.providers=[];}
+    {const s=d.settings;if(s.aiEndpoint==null)s.aiEndpoint='';if(s.catalogEndpoint==null)s.catalogEndpoint='';if(s.musicEndpoint==null)s.musicEndpoint='';if(!s.country)s.country='BR';if(!Array.isArray(s.providers))s.providers=[];}
     d.languages.forEach(l=>{if(!l.songs)l.songs=[];if(!l.films)l.films=[]});
     DB=d;save();refreshLangSwitch();renderManage();toast('Dados importados');
   }catch(e){toast('Arquivo inválido')}};
@@ -1237,6 +1308,11 @@ function addGenCards(){
 function openSongModal(id){
   const l=curLang();const s=id?l.songs.find(x=>x.id===id):null;
   modal(`<h3>${s?'Editar':'Nova'} música</h3>
+    <label class="field"><span>🔎 Buscar automaticamente</span>
+      <div style="display:flex;gap:8px">
+        <input id="s_search" class="input" placeholder="nome da música / artista">
+        <button class="btn sm" id="s_searchBtn" type="button" onclick="autoFillSong()">Buscar</button>
+      </div></label>
     <label class="field"><span>Título</span><input id="s_title" class="input" value="${s?esc(s.title):''}" placeholder="Nome da música"></label>
     <label class="field"><span>Artista (opcional)</span><input id="s_artist" class="input" value="${s?esc(s.artist):''}"></label>
     <label class="field"><span>Link do YouTube (opcional)</span><input id="s_yt" class="input" value="${s?esc(s.youtube):''}" placeholder="https://youtube.com/..."></label>
@@ -1266,6 +1342,23 @@ function saveSong(id){
   save();closeModal();renderMedia();toast('Música salva');
 }
 function delSong(id){const l=curLang();l.songs=l.songs.filter(s=>s.id!==id);save();renderMedia();toast('Música removida')}
+async function autoFillSong(){
+  const ep=DB.settings.musicEndpoint;
+  const q=document.getElementById('s_search').value.trim();
+  if(!q){toast('Digite o nome da música');return}
+  if(!ep){toast('Conecte a busca em Gerenciar › Dados');return}
+  const btn=document.getElementById('s_searchBtn');btn.disabled=true;btn.textContent='...';
+  try{
+    const res=await fetch(ep,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({query:q})});
+    const d=await res.json();
+    if(d.title)document.getElementById('s_title').value=d.title;
+    if(d.artist)document.getElementById('s_artist').value=d.artist;
+    if(d.youtube)document.getElementById('s_yt').value=d.youtube;
+    if(d.lyrics)document.getElementById('s_lyrics').value=d.lyrics;
+    toast(d.lyrics?'Música e letra preenchidas':(d.title?'Música encontrada — cole a letra':'Nada encontrado'));
+  }catch(e){toast('Falha na busca (verifique o backend)')}
+  finally{btn.disabled=false;btn.textContent='Buscar';}
+}
 
 /* =========================================================
    FILMES & SÉRIES — vocabulário + cobertura
@@ -1604,7 +1697,13 @@ function dispItem(item){return langKey(curLang())==='ja'?jpRender(item.f,item.r)
 
 function openLevel(id){DB.currentLangId=id;save();refreshLangSwitch();go('level')}
 
+
 function renderLevel(){
+  const code=langKey(curLang());
+  if(code&&MANIFEST&&!CONTENT_META.loaded.includes(code)){
+    document.getElementById('view-level').innerHTML='<div class="card pad empty" style="margin-top:20px"><span class="typing"><i></i><i></i><i></i></span><p class="muted" style="margin-top:10px">Carregando conteúdo do idioma…</p></div>';
+    ensureLangContent(code).then(()=>renderLevel());return;
+  }
   const l=curLang();const curr=curCurriculum();
   const el=document.getElementById('view-level');
   if(!curr){
@@ -1647,6 +1746,7 @@ function renderLevel(){
           return `<div class="row-item"><div class="grow"><div class="t">${dispItem(it)}</div><div class="d">${esc(it.b)}</div></div>${chip}</div>`}).join('')}
       </div>
       <button class="btn gold block" style="margin-top:12px" onclick="addLevelToDeck('${lv.id}')">+ Adicionar itens deste nível ao baralho</button>
+      ${(lv.quiz&&lv.quiz.length)?`<button class="btn ghost block" style="margin-top:8px" onclick="addLevelQuiz('${lv.id}')">+ Adicionar ${lv.quiz.length} questões deste nível à Gramática</button>`:''}
     </div>
 
     ${next?`<div class="card pad" style="margin-bottom:14px">
@@ -1657,10 +1757,23 @@ function renderLevel(){
     <button class="btn ghost block" onclick="if(confirm('Refazer o teste de nivelamento?')){curLang().level=null;save();renderLevel()}">Refazer teste de nivelamento</button>`;
 }
 
+function addLevelQuiz(levelId){
+  const l=curLang();const curr=curCurriculum();const lv=levelById(curr,levelId);
+  if(!lv||!lv.quiz)return;
+  let n=0;
+  lv.quiz.forEach(it=>{
+    const exists=l.grammar.some(g=>normWord(g.prompt)===normWord(it.q));
+    if(!exists&&it.q&&Array.isArray(it.o)&&it.o.length>=2){
+      l.grammar.push(gq(it.q,it.o,Math.max(0,Math.min(it.o.length-1,it.a||0)),it.e||''));n++;
+    }
+  });
+  save();renderLevel();
+  toast(n?`${n} questões adicionadas à Gramática`:'Todas já estão na Gramática');
+}
 function addLevelToDeck(levelId){
   const l=curLang();const curr=curCurriculum();const lv=levelById(curr,levelId);
   let n=0;
-  lv.core.forEach(it=>{if(!deckCardFor(l,it)){l.vocab.push(vcard(it.f,it.b,'',it.r||''));n++}});
+  lv.core.forEach(it=>{if(!deckCardFor(l,it)){l.vocab.push(vcard(it.f,it.b,it.ex||'',it.r||''));n++}});
   save();renderLevel();refreshLangSwitch();
   toast(n?`${n} itens adicionados ao baralho`:'Todos já estão no baralho');
 }
@@ -1743,7 +1856,7 @@ function toast(msg){const t=document.getElementById('toast');t.textContent=msg;t
   clearTimeout(toastTimer);toastTimer=setTimeout(()=>t.classList.remove('show'),2200);}
 
 /* go */
-boot();
+loadContent().then(boot);
 </script>
 </body>
 </html>

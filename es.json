@@ -1,0 +1,917 @@
+{
+ "code": "es",
+ "name": "Espanhol",
+ "flag": "🇪🇸",
+ "framework": "CEFR / DELE",
+ "version": 1,
+ "updated": "2026-07-09",
+ "note": "Vocabulário, exemplos e questões autorais, organizados pelos níveis do CEFR/DELE.",
+ "levels": [
+  {
+   "id": "A1",
+   "label": "A1",
+   "desc": "Iniciante — frases básicas.",
+   "grammar": [
+    "ser vs estar",
+    "presente regular",
+    "artigos e gênero",
+    "números e horas"
+   ],
+   "core": [
+    {
+     "f": "hola",
+     "b": "olá",
+     "ex": "Hola, me llamo Ana.",
+     "exb": "Olá, meu nome é Ana."
+    },
+    {
+     "f": "agua",
+     "b": "água",
+     "ex": "Bebo agua todos los días.",
+     "exb": "Bebo água todos os dias."
+    },
+    {
+     "f": "casa",
+     "b": "casa",
+     "ex": "Su casa está cerca del parque.",
+     "exb": "A casa dele fica perto do parque."
+    },
+    {
+     "f": "comer",
+     "b": "comer",
+     "ex": "Comemos a las siete.",
+     "exb": "Comemos às sete."
+    },
+    {
+     "f": "grande",
+     "b": "grande",
+     "ex": "Es un perro grande.",
+     "exb": "É um cachorro grande."
+    },
+    {
+     "f": "amigo",
+     "b": "amigo",
+     "ex": "Él es mi mejor amigo.",
+     "exb": "Ele é meu melhor amigo."
+    },
+    {
+     "f": "día",
+     "b": "dia",
+     "ex": "¡Que tengas un buen día!",
+     "exb": "Tenha um bom dia!"
+    },
+    {
+     "f": "bueno",
+     "b": "bom",
+     "ex": "Este café es bueno.",
+     "exb": "Este café é bom."
+    },
+    {
+     "f": "trabajar",
+     "b": "trabalhar",
+     "ex": "Trabajo en una oficina pequeña.",
+     "exb": "Trabalho num escritório pequeno."
+    },
+    {
+     "f": "familia",
+     "b": "família",
+     "ex": "Mi familia vive en Brasil.",
+     "exb": "Minha família mora no Brasil."
+    },
+    {
+     "f": "ciudad",
+     "b": "cidade",
+     "ex": "La ciudad es muy tranquila.",
+     "exb": "A cidade é muito tranquila."
+    },
+    {
+     "f": "vivir",
+     "b": "morar",
+     "ex": "Viven cerca del mar.",
+     "exb": "Eles moram perto do mar."
+    },
+    {
+     "f": "nombre",
+     "b": "nome",
+     "ex": "¿Cuál es tu nombre?",
+     "exb": "Qual é o seu nome?"
+    },
+    {
+     "f": "comida",
+     "b": "comida",
+     "ex": "La comida está lista.",
+     "exb": "A comida está pronta."
+    },
+    {
+     "f": "pequeño",
+     "b": "pequeno",
+     "ex": "Tengo un coche pequeño.",
+     "exb": "Tenho um carro pequeno."
+    },
+    {
+     "f": "querer",
+     "b": "querer",
+     "ex": "Quiero un poco de agua.",
+     "exb": "Quero um pouco de água."
+    }
+   ],
+   "quiz": [
+    {
+     "q": "\"Yo ___ español.\" (hablar)",
+     "o": [
+      "hablo",
+      "hablas",
+      "habla"
+     ],
+     "a": 0,
+     "e": "Primeira pessoa do singular: hablo."
+    },
+    {
+     "q": "Artigo correto: \"___ mesa\"",
+     "o": [
+      "el",
+      "la",
+      "los"
+     ],
+     "a": 1,
+     "e": "\"Mesa\" é feminino: la mesa."
+    },
+    {
+     "q": "\"Ella ___ médica.\" (profissão permanente)",
+     "o": [
+      "es",
+      "está",
+      "son"
+     ],
+     "a": 0,
+     "e": "Profissão é característica: usa-se \"ser\"."
+    },
+    {
+     "q": "\"El café ___ caliente.\" (estado agora)",
+     "o": [
+      "es",
+      "está",
+      "son"
+     ],
+     "a": 1,
+     "e": "Estado temporário: usa-se \"estar\"."
+    }
+   ]
+  },
+  {
+   "id": "A2",
+   "label": "A2",
+   "desc": "Básico — rotina.",
+   "grammar": [
+    "pretérito indefinido",
+    "pretérito imperfecto",
+    "comparativos",
+    "verbos reflexivos"
+   ],
+   "core": [
+    {
+     "f": "porque",
+     "b": "porque",
+     "ex": "Me quedé en casa porque llovió.",
+     "exb": "Fiquei em casa porque choveu."
+    },
+    {
+     "f": "a veces",
+     "b": "às vezes",
+     "ex": "A veces camino al trabajo.",
+     "exb": "Às vezes vou a pé ao trabalho."
+    },
+    {
+     "f": "tiempo",
+     "b": "tempo (clima)",
+     "ex": "Hoy hace mal tiempo.",
+     "exb": "Hoje o tempo está ruim."
+    },
+    {
+     "f": "ya",
+     "b": "já",
+     "ex": "Ella ya llegó.",
+     "exb": "Ela já chegou."
+    },
+    {
+     "f": "ocupado",
+     "b": "ocupado",
+     "ex": "Estoy ocupado esta semana.",
+     "exb": "Estou ocupado esta semana."
+    },
+    {
+     "f": "viajar",
+     "b": "viajar",
+     "ex": "Vamos a viajar el mes próximo.",
+     "exb": "Vamos viajar no mês que vem."
+    },
+    {
+     "f": "recordar",
+     "b": "lembrar",
+     "ex": "Recuerdo esa canción.",
+     "exb": "Lembro daquela música."
+    },
+    {
+     "f": "barato",
+     "b": "barato",
+     "ex": "Esta camisa es barata.",
+     "exb": "Esta camisa é barata."
+    },
+    {
+     "f": "llegar",
+     "b": "chegar",
+     "ex": "El tren llegó tarde.",
+     "exb": "O trem chegou atrasado."
+    },
+    {
+     "f": "caro",
+     "b": "caro",
+     "ex": "Ese bolso es muy caro.",
+     "exb": "Aquela bolsa é muito cara."
+    },
+    {
+     "f": "salud",
+     "b": "saúde",
+     "ex": "La salud es lo primero.",
+     "exb": "A saúde vem primeiro."
+    },
+    {
+     "f": "intentar",
+     "b": "tentar",
+     "ex": "Vamos a intentarlo otra vez.",
+     "exb": "Vamos tentar de novo."
+    },
+    {
+     "f": "barrio",
+     "b": "bairro",
+     "ex": "Nuestro barrio es seguro.",
+     "exb": "Nosso bairro é seguro."
+    },
+    {
+     "f": "traer",
+     "b": "trazer",
+     "ex": "Ella trajo un paraguas.",
+     "exb": "Ela trouxe um guarda-chuva."
+    },
+    {
+     "f": "cansado",
+     "b": "cansado",
+     "ex": "Hoy estoy cansado.",
+     "exb": "Hoje estou cansado."
+    },
+    {
+     "f": "suficiente",
+     "b": "suficiente",
+     "ex": "Tenemos tiempo suficiente.",
+     "exb": "Temos tempo suficiente."
+    }
+   ],
+   "quiz": [
+    {
+     "q": "Pretérito indefinido de \"comer\" (yo):",
+     "o": [
+      "comí",
+      "comía",
+      "como"
+     ],
+     "a": 0,
+     "e": "Ação pontual concluída: comí."
+    },
+    {
+     "q": "\"Cuando era niño, ___ mucho.\"",
+     "o": [
+      "jugué",
+      "jugaba",
+      "juego"
+     ],
+     "a": 1,
+     "e": "Imperfecto descreve hábito no passado."
+    },
+    {
+     "q": "\"Este libro es ___ que aquel.\"",
+     "o": [
+      "más barato",
+      "el más barato",
+      "tan barato"
+     ],
+     "a": 0,
+     "e": "Comparativo de superioridade: más + adjetivo + que."
+    },
+    {
+     "q": "\"Yo ___ levanto a las siete.\"",
+     "o": [
+      "me",
+      "se",
+      "te"
+     ],
+     "a": 0,
+     "e": "Verbo reflexivo com \"yo\": me levanto."
+    }
+   ]
+  },
+  {
+   "id": "B1",
+   "label": "B1",
+   "desc": "Intermediário.",
+   "grammar": [
+    "subjuntivo presente",
+    "condicional simple",
+    "perífrasis verbais",
+    "pretérito perfecto"
+   ],
+   "core": [
+    {
+     "f": "aunque",
+     "b": "embora",
+     "ex": "Aunque fue difícil, terminé.",
+     "exb": "Embora fosse difícil, terminei."
+    },
+    {
+     "f": "consejo",
+     "b": "conselho",
+     "ex": "Me dio un buen consejo.",
+     "exb": "Deu-me um bom conselho."
+    },
+    {
+     "f": "mejorar",
+     "b": "melhorar",
+     "ex": "Quiero mejorar mi acento.",
+     "exb": "Quero melhorar meu sotaque."
+    },
+    {
+     "f": "lograr",
+     "b": "conseguir",
+     "ex": "Logró resolverlo.",
+     "exb": "Conseguiu resolvê-lo."
+    },
+    {
+     "f": "medio ambiente",
+     "b": "meio ambiente",
+     "ex": "Debemos proteger el medio ambiente.",
+     "exb": "Devemos proteger o meio ambiente."
+    },
+    {
+     "f": "disponible",
+     "b": "disponível",
+     "ex": "La sala está disponible ahora.",
+     "exb": "A sala está disponível agora."
+    },
+    {
+     "f": "sin embargo",
+     "b": "no entanto",
+     "ex": "Sin embargo, el resultado fue distinto.",
+     "exb": "No entanto, o resultado foi diferente."
+    },
+    {
+     "f": "merecer",
+     "b": "merecer",
+     "ex": "Mereces este premio.",
+     "exb": "Você merece este prêmio."
+    },
+    {
+     "f": "habilidad",
+     "b": "habilidade",
+     "ex": "Escuchar es una habilidad clave.",
+     "exb": "Escutar é uma habilidade-chave."
+    },
+    {
+     "f": "sugerir",
+     "b": "sugerir",
+     "ex": "Sugirió otro camino.",
+     "exb": "Sugeriu outro caminho."
+    },
+    {
+     "f": "fiable",
+     "b": "confiável",
+     "ex": "Es un socio fiable.",
+     "exb": "É um sócio confiável."
+    },
+    {
+     "f": "evitar",
+     "b": "evitar",
+     "ex": "Intenta evitar errores.",
+     "exb": "Tente evitar erros."
+    },
+    {
+     "f": "propósito",
+     "b": "propósito",
+     "ex": "¿Cuál es el propósito de esto?",
+     "exb": "Qual é o propósito disto?"
+    },
+    {
+     "f": "alcanzar",
+     "b": "alcançar",
+     "ex": "Alcanzó su meta.",
+     "exb": "Alcançou sua meta."
+    },
+    {
+     "f": "asunto",
+     "b": "questão / assunto",
+     "ex": "Discutimos el asunto.",
+     "exb": "Discutimos a questão."
+    },
+    {
+     "f": "apoyar",
+     "b": "apoiar",
+     "ex": "Te apoyo en tu decisión.",
+     "exb": "Apoio você na sua decisão."
+    }
+   ],
+   "quiz": [
+    {
+     "q": "\"Espero que ___ bien.\" (estar)",
+     "o": [
+      "estás",
+      "estés",
+      "estabas"
+     ],
+     "a": 1,
+     "e": "Após \"espero que\" usa-se o subjuntivo."
+    },
+    {
+     "q": "\"Si tuviera dinero, ___ un coche.\"",
+     "o": [
+      "compro",
+      "compraría",
+      "compré"
+     ],
+     "a": 1,
+     "e": "Condicional simple na apódose."
+    },
+    {
+     "q": "\"Acabo ___ llegar.\"",
+     "o": [
+      "de",
+      "a",
+      "en"
+     ],
+     "a": 0,
+     "e": "\"Acabar de + infinitivo\" = acabar de fazer algo."
+    },
+    {
+     "q": "Pretérito perfecto: \"Hoy ___ mucho.\"",
+     "o": [
+      "trabajé",
+      "he trabajado",
+      "trabajaba"
+     ],
+     "a": 1,
+     "e": "Com \"hoy\" usa-se o pretérito perfecto na Espanha."
+    }
+   ]
+  },
+  {
+   "id": "B2",
+   "label": "B2",
+   "desc": "Intermediário-alto.",
+   "grammar": [
+    "subjuntivo imperfecto",
+    "oraciones condicionales",
+    "voz passiva",
+    "estilo indirecto"
+   ],
+   "core": [
+    {
+     "f": "no obstante",
+     "b": "mesmo assim",
+     "ex": "Era tarde; no obstante, seguimos.",
+     "exb": "Era tarde; mesmo assim, continuamos."
+    },
+    {
+     "f": "logro",
+     "b": "conquista",
+     "ex": "Ganar fue un gran logro.",
+     "exb": "Vencer foi uma grande conquista."
+    },
+    {
+     "f": "reacio",
+     "b": "relutante",
+     "ex": "Se mostró reacio a aceptar.",
+     "exb": "Mostrou-se relutante em aceitar."
+    },
+    {
+     "f": "superar",
+     "b": "superar",
+     "ex": "Superó muchos obstáculos.",
+     "exb": "Superou muitos obstáculos."
+    },
+    {
+     "f": "minucioso",
+     "b": "minucioso",
+     "ex": "Necesitamos un análisis minucioso.",
+     "exb": "Precisamos de uma análise minuciosa."
+    },
+    {
+     "f": "percepción",
+     "b": "percepção",
+     "ex": "El libro ofrece una percepción real.",
+     "exb": "O livro oferece uma percepção real."
+    },
+    {
+     "f": "sostenible",
+     "b": "sustentável",
+     "ex": "Es una solución sostenible.",
+     "exb": "É uma solução sustentável."
+    },
+    {
+     "f": "ámbito",
+     "b": "âmbito",
+     "ex": "En el ámbito educativo, cambió todo.",
+     "exb": "No âmbito educacional, tudo mudou."
+    },
+    {
+     "f": "reconocer",
+     "b": "reconhecer",
+     "ex": "Reconoció el error.",
+     "exb": "Reconheceu o erro."
+    },
+    {
+     "f": "resultado",
+     "b": "resultado",
+     "ex": "El resultado sorprendió a todos.",
+     "exb": "O resultado surpreendeu a todos."
+    },
+    {
+     "f": "generalizado",
+     "b": "generalizado",
+     "ex": "La práctica está generalizada.",
+     "exb": "A prática está generalizada."
+    },
+    {
+     "f": "destacar",
+     "b": "destacar",
+     "ex": "Destacó la seguridad.",
+     "exb": "Destacou a segurança."
+    },
+    {
+     "f": "sesgo",
+     "b": "viés",
+     "ex": "El estudio muestra cierto sesgo.",
+     "exb": "O estudo mostra certo viés."
+    },
+    {
+     "f": "evaluar",
+     "b": "avaliar",
+     "ex": "Evaluamos los resultados cada mes.",
+     "exb": "Avaliamos os resultados todo mês."
+    },
+    {
+     "f": "debilitar",
+     "b": "enfraquecer",
+     "ex": "La duda puede debilitar el avance.",
+     "exb": "A dúvida pode enfraquecer o avanço."
+    },
+    {
+     "f": "marco",
+     "b": "arcabouço",
+     "ex": "Seguimos un marco claro.",
+     "exb": "Seguimos um arcabouço claro."
+    }
+   ],
+   "quiz": [
+    {
+     "q": "\"Si ___ rico, viajaría más.\"",
+     "o": [
+      "soy",
+      "fuera",
+      "seré"
+     ],
+     "a": 1,
+     "e": "Condicional irreal usa subjuntivo imperfecto."
+    },
+    {
+     "q": "Voz passiva de \"Construyeron la casa\":",
+     "o": [
+      "La casa construyó",
+      "La casa fue construida",
+      "La casa está construyendo"
+     ],
+     "a": 1,
+     "e": "Ser + particípio forma a passiva."
+    },
+    {
+     "q": "Estilo indirecto de \"Estoy cansado\", dijo:",
+     "o": [
+      "Dijo que está cansado",
+      "Dijo que estaba cansado",
+      "Dice que estaba cansado"
+     ],
+     "a": 1,
+     "e": "O presente recua ao imperfecto no discurso indireto."
+    },
+    {
+     "q": "\"Ojalá ___ venido.\"",
+     "o": [
+      "ha",
+      "hubiera",
+      "habrá"
+     ],
+     "a": 1,
+     "e": "Ojalá + subjuntivo para desejo irreal no passado."
+    }
+   ]
+  },
+  {
+   "id": "C1",
+   "label": "C1",
+   "desc": "Avançado.",
+   "grammar": [
+    "subjuntivo pluscuamperfecto",
+    "conectores del discurso",
+    "oraciones concesivas",
+    "registro formal"
+   ],
+   "core": [
+    {
+     "f": "discernir",
+     "b": "discernir",
+     "ex": "Es difícil discernir la verdad.",
+     "exb": "É difícil discernir a verdade."
+    },
+    {
+     "f": "abogar",
+     "b": "defender",
+     "ex": "Aboga por la reforma.",
+     "exb": "Defende a reforma."
+    },
+    {
+     "f": "convincente",
+     "b": "convincente",
+     "ex": "Presentó un caso convincente.",
+     "exb": "Apresentou um caso convincente."
+    },
+    {
+     "f": "mitigar",
+     "b": "mitigar",
+     "ex": "Se tomaron medidas para mitigar el riesgo.",
+     "exb": "Tomaram-se medidas para mitigar o risco."
+    },
+    {
+     "f": "predominante",
+     "b": "predominante",
+     "ex": "Esa visión es predominante hoy.",
+     "exb": "Essa visão é predominante hoje."
+    },
+    {
+     "f": "matiz",
+     "b": "nuance",
+     "ex": "El matiz pasa desapercibido.",
+     "exb": "A nuance passa despercebida."
+    },
+    {
+     "f": "índole",
+     "b": "índole",
+     "ex": "Es un problema de otra índole.",
+     "exb": "É um problema de outra índole."
+    },
+    {
+     "f": "recurrir",
+     "b": "recorrer",
+     "ex": "Recurrieron a otra estrategia.",
+     "exb": "Recorreram a outra estratégia."
+    },
+    {
+     "f": "inherente",
+     "b": "inerente",
+     "ex": "Hay una limitación inherente.",
+     "exb": "Há uma limitação inerente."
+    },
+    {
+     "f": "aliviar",
+     "b": "aliviar",
+     "ex": "La medida alivió la carga.",
+     "exb": "A medida aliviou o fardo."
+    },
+    {
+     "f": "ambiguo",
+     "b": "ambíguo",
+     "ex": "Su respuesta fue ambigua.",
+     "exb": "A resposta dele foi ambígua."
+    },
+    {
+     "f": "fundamentar",
+     "b": "fundamentar",
+     "ex": "No pudieron fundamentar la acusación.",
+     "exb": "Não conseguiram fundamentar a acusação."
+    },
+    {
+     "f": "crucial",
+     "b": "crucial",
+     "ex": "Fue un momento crucial.",
+     "exb": "Foi um momento crucial."
+    },
+    {
+     "f": "discrepancia",
+     "b": "discrepância",
+     "ex": "Hallamos una discrepancia en las cifras.",
+     "exb": "Encontramos uma discrepância nos números."
+    },
+    {
+     "f": "escrutinio",
+     "b": "escrutínio",
+     "ex": "El informe fue sometido a escrutinio.",
+     "exb": "O relatório foi submetido a escrutínio."
+    },
+    {
+     "f": "sostener",
+     "b": "sustentar",
+     "ex": "Los críticos sostienen lo contrario.",
+     "exb": "Os críticos sustentam o contrário."
+    }
+   ],
+   "quiz": [
+    {
+     "q": "\"Si ___ estudiado, habría aprobado.\"",
+     "o": [
+      "hubiera",
+      "habría",
+      "he"
+     ],
+     "a": 0,
+     "e": "Pluscuamperfecto de subjuntivo na prótase."
+    },
+    {
+     "q": "Conector de contraste formal:",
+     "o": [
+      "por lo tanto",
+      "no obstante",
+      "además"
+     ],
+     "a": 1,
+     "e": "\"No obstante\" introduz contraste."
+    },
+    {
+     "q": "\"Por más que ___, no lo logró.\"",
+     "o": [
+      "intentó",
+      "intentara",
+      "intenta"
+     ],
+     "a": 1,
+     "e": "Concessiva com subjuntivo."
+    },
+    {
+     "q": "\"Índole\" significa aproximadamente:",
+     "o": [
+      "natureza / caráter",
+      "tamanho",
+      "urgência"
+     ],
+     "a": 0,
+     "e": "Índole = natureza ou caráter de algo."
+    }
+   ]
+  },
+  {
+   "id": "C2",
+   "label": "C2",
+   "desc": "Domínio.",
+   "grammar": [
+    "matices de registro",
+    "modismos avançados",
+    "subordinadas complexas",
+    "elipsis"
+   ],
+   "core": [
+    {
+     "f": "ubicuo",
+     "b": "onipresente",
+     "ex": "Las pantallas son ubicuas hoy.",
+     "exb": "As telas são onipresentes hoje."
+    },
+    {
+     "f": "efímero",
+     "b": "efêmero",
+     "ex": "La fama puede ser efímera.",
+     "exb": "A fama pode ser efêmera."
+    },
+    {
+     "f": "meticuloso",
+     "b": "meticuloso",
+     "ex": "Es meticuloso con los detalles.",
+     "exb": "É meticuloso com os detalhes."
+    },
+    {
+     "f": "paradigma",
+     "b": "paradigma",
+     "ex": "Esto marca un cambio de paradigma.",
+     "exb": "Isto marca uma mudança de paradigma."
+    },
+    {
+     "f": "yuxtaponer",
+     "b": "justapor",
+     "ex": "La obra yuxtapone pasado y presente.",
+     "exb": "A obra justapõe passado e presente."
+    },
+    {
+     "f": "esotérico",
+     "b": "esotérico",
+     "ex": "El tema es algo esotérico.",
+     "exb": "O tema é um tanto esotérico."
+    },
+    {
+     "f": "franqueza",
+     "b": "franqueza",
+     "ex": "Agradecí su franqueza.",
+     "exb": "Agradeci a franqueza dela."
+    },
+    {
+     "f": "soslayar",
+     "b": "contornar / evitar",
+     "ex": "Soslayó la pregunta.",
+     "exb": "Contornou a pergunta."
+    },
+    {
+     "f": "tácito",
+     "b": "tácito",
+     "ex": "Hubo un acuerdo tácito.",
+     "exb": "Houve um acordo tácito."
+    },
+    {
+     "f": "ofuscar",
+     "b": "obscurecer",
+     "ex": "La jerga puede ofuscar el sentido.",
+     "exb": "O jargão pode obscurecer o sentido."
+    },
+    {
+     "f": "inocuo",
+     "b": "inócuo",
+     "ex": "El comentario parecía inocuo.",
+     "exb": "O comentário parecia inócuo."
+    },
+    {
+     "f": "permear",
+     "b": "permear",
+     "ex": "El optimismo permea el texto.",
+     "exb": "O otimismo permeia o texto."
+    },
+    {
+     "f": "sobresaliente",
+     "b": "saliente / notável",
+     "ex": "Obtuvo un resultado sobresaliente.",
+     "exb": "Obteve um resultado notável."
+    },
+    {
+     "f": "equívoco",
+     "b": "ambíguo",
+     "ex": "La evidencia es equívoca.",
+     "exb": "A evidência é ambígua."
+    },
+    {
+     "f": "impregnar",
+     "b": "impregnar",
+     "ex": "La idea impregnó el debate.",
+     "exb": "A ideia impregnou o debate."
+    },
+    {
+     "f": "contundente",
+     "b": "contundente",
+     "ex": "Dio una respuesta contundente.",
+     "exb": "Deu uma resposta contundente."
+    }
+   ],
+   "quiz": [
+    {
+     "q": "\"Soslayar\" significa:",
+     "o": [
+      "enfrentar",
+      "evitar / contornar",
+      "exagerar"
+     ],
+     "a": 1,
+     "e": "Soslayar = esquivar-se de algo."
+    },
+    {
+     "q": "\"Tácito\" quer dizer:",
+     "o": [
+      "explícito",
+      "implícito",
+      "ruidoso"
+     ],
+     "a": 1,
+     "e": "Tácito = subentendido, não declarado."
+    },
+    {
+     "q": "\"Ubicuo\" significa:",
+     "o": [
+      "raro",
+      "presente em toda parte",
+      "antigo"
+     ],
+     "a": 1,
+     "e": "Ubicuo = onipresente."
+    },
+    {
+     "q": "Registro mais formal para \"pero\":",
+     "o": [
+      "pero",
+      "no obstante",
+      "y"
+     ],
+     "a": 1,
+     "e": "\"No obstante\" pertence ao registro formal."
+    }
+   ]
+  }
+ ]
+}

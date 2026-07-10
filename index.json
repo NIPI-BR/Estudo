@@ -1,0 +1,37 @@
+{
+  "schema": 2,
+  "updated": "2026-07-09",
+  "note": "Manifesto do banco de conteúdo do NIPI Línguas. O app lê este arquivo e carrega sob demanda apenas o idioma ativo. Conteúdo autoral: vocabulário, exemplos e questões escritos originalmente. Não contém material de terceiros (letras de música, textos de livros ou legendas) — esses ficam apenas no dispositivo do usuário.",
+  "languages": [
+    { "code": "en", "name": "Inglês",   "flag": "🇬🇧", "framework": "CEFR",         "file": "en.json", "version": 1 },
+    { "code": "es", "name": "Espanhol", "flag": "🇪🇸", "framework": "CEFR / DELE",  "file": "es.json", "version": 1 },
+    { "code": "ja", "name": "Japonês",  "flag": "🇯🇵", "framework": "JLPT",         "file": "ja.json", "version": 1 },
+    { "code": "ko", "name": "Coreano",  "flag": "🇰🇷", "framework": "TOPIK",        "file": "ko.json", "version": 1 }
+  ],
+  "sources": [
+    {
+      "language": "ko",
+      "kind": "referência de escopo",
+      "title": "쏙쏙 한국어 초급 TOPIK I Vocabulary (40 Days)",
+      "used_for": "Calibrar o escopo e a progressão dos níveis TOPIK 1–2. Nenhum conteúdo transcrito.",
+      "received": "2026-07-09"
+    },
+    {
+      "language": "ko",
+      "kind": "referência de escopo",
+      "title": "TOPIK 2 Vocabulary in 50 Days",
+      "used_for": "Calibrar o escopo e a progressão dos níveis TOPIK 3–6. Nenhum conteúdo transcrito.",
+      "received": "2026-07-09"
+    }
+  ],
+  "schema_doc": {
+    "level": {
+      "id": "identificador curto (A1, N5, T1...)",
+      "label": "rótulo exibido",
+      "desc": "descrição do nível",
+      "grammar": ["pontos gramaticais do nível"],
+      "core": [{ "f": "termo", "b": "tradução PT", "r": "leitura (só japonês)", "ex": "frase de exemplo original", "exb": "tradução da frase" }],
+      "quiz": [{ "q": "enunciado", "o": ["opções"], "a": "índice da correta", "e": "explicação" }]
+    }
+  }
+}
