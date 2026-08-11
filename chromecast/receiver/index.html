@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Painel — Receiver</title>
+  <link rel="stylesheet" href="receiver.css">
+  <!-- SDK do Cast Application Framework (receiver v3) -->
+  <script src="//www.gstatic.com/cast/sdk/libs/caf_receiver/v3/cast_receiver_framework.js"></script>
+</head>
+<body>
+  <main id="stage">
+    <section id="slide" class="slide"></section>
+
+    <div id="overlay">
+      <div id="brand"></div>
+      <div id="clock">
+        <span id="time">--:--</span>
+        <span id="date"></span>
+      </div>
+    </div>
+
+    <div id="progress"><div id="progress-bar"></div></div>
+    <div id="status" class="hidden"></div>
+  </main>
+
+  <script src="receiver.js"></script>
+</body>
+</html>
