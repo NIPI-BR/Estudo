@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="reader_background">#FF000000</color>
+    <color name="reader_word">#FFFFFFFF</color>
+    <!-- Cinza bem apagado: o HUD precisa existir sem competir com a palavra. -->
+    <color name="reader_hud">#FF4A4A4A</color>
+    <color name="reader_progress">#FF6E6E6E</color>
+
+    <color name="background">#FF0A0A0A</color>
+    <color name="surface">#FF1A1A1A</color>
+    <color name="white">#FFFFFFFF</color>
+    <color name="text_muted">#FF9A9A9A</color>
+
+    <color name="ic_launcher_background">#FF000000</color>
+</resources>

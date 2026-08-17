@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Controle do Painel</title>
+  <link rel="stylesheet" href="sender.css">
+</head>
+<body>
+  <header>
+    <h1>Controle do Painel</h1>
+    <google-cast-launcher id="cast-button"></google-cast-launcher>
+  </header>
+
+  <p id="connection" class="badge off">Desconectado</p>
+
+  <main>
+    <section class="card">
+      <h2>Agora na TV</h2>
+      <p id="now-playing" class="now">—</p>
+      <div class="controls">
+        <button id="prev" data-command="PREV">◀ Anterior</button>
+        <button id="toggle" data-command="TOGGLE">⏸ Pausar</button>
+        <button id="next" data-command="NEXT">Próximo ▶</button>
+        <button id="reload" data-command="RELOAD">↻ Recarregar</button>
+      </div>
+    </section>
+
+    <section class="card">
+      <h2>Fonte do conteúdo</h2>
+      <p class="hint">URL do JSON que o painel busca. Precisa estar acessível pela TV (HTTPS).</p>
+      <div class="row">
+        <input id="source-url" type="url" placeholder="https://exemplo.com/slides.json">
+        <button id="set-source">Usar esta fonte</button>
+      </div>
+    </section>
+
+    <section class="card">
+      <h2>Enviar conteúdo direto</h2>
+      <p class="hint">Manda a configuração abaixo para a TV sem passar por arquivo. Útil para testar.</p>
+      <textarea id="config-json" spellcheck="false" rows="16"></textarea>
+      <div class="row">
+        <button id="send-config" class="primary">Enviar para a TV</button>
+        <button id="load-example">Carregar exemplo</button>
+        <span id="json-error" class="error"></span>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <p>App ID: <code id="app-id">—</code></p>
+  </footer>
+
+  <script src="config.js"></script>
+  <script src="sender.js"></script>
+  <!-- O SDK chama window.__onGCastApiAvailable quando termina de carregar,
+       por isso ele vem depois do nosso script. -->
+  <script src="https://www.gstatic.com/cv/js/sender/v1/cast_sender.js?loadCastFramework=1"></script>
+</body>
+</html>

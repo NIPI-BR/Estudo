@@ -1,0 +1,192 @@
+/* Estilos do painel exibido na TV.
+   Tudo é dimensionado em vw/vh porque o receiver roda em 1280x720 (ou 1920x1080)
+   e precisa ficar legível a alguns metros de distância. */
+
+:root {
+  --bg: #0b1020;
+  --bg-alt: #131a33;
+  --fg: #f5f7ff;
+  --muted: #93a0c4;
+  --accent: #3b82f6;
+  --ok: #22c55e;
+  --warn: #f59e0b;
+  --danger: #ef4444;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+html, body {
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  background: var(--bg);
+  color: var(--fg);
+  font-family: "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  /* A TV costuma cortar as bordas (overscan). O padding do #stage compensa. */
+}
+
+#stage {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  padding: 3vh 3vw;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* ---------- Slide ---------- */
+
+.slide {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2vh;
+  text-align: center;
+  opacity: 0;
+  transition: opacity 500ms ease;
+}
+
+.slide.visible { opacity: 1; }
+
+.slide h1 {
+  font-size: 6vw;
+  font-weight: 700;
+  line-height: 1.1;
+}
+
+.slide h2 {
+  font-size: 3vw;
+  font-weight: 400;
+  color: var(--muted);
+  line-height: 1.3;
+}
+
+.slide p {
+  font-size: 2.2vw;
+  color: var(--muted);
+  max-width: 70vw;
+  line-height: 1.4;
+}
+
+/* Slide de imagem: preenche a tela sem distorcer */
+.slide.image {
+  background-size: contain;
+  background-position: center;
+  background-repeat: no-repeat;
+}
+
+.slide.image.cover { background-size: cover; }
+
+/* Slide de métricas: grade de cartões */
+.metrics {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(20vw, 1fr));
+  gap: 2vw;
+  width: 100%;
+}
+
+.metric {
+  background: var(--bg-alt);
+  border-radius: 1.5vw;
+  padding: 3vh 2vw;
+  display: flex;
+  flex-direction: column;
+  gap: 1vh;
+}
+
+.metric .value {
+  font-size: 5vw;
+  font-weight: 700;
+}
+
+.metric .label {
+  font-size: 1.6vw;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.1vw;
+}
+
+.metric.ok .value { color: var(--ok); }
+.metric.warn .value { color: var(--warn); }
+.metric.danger .value { color: var(--danger); }
+
+/* Slide de lista (avisos, cardápio, agenda) */
+.list {
+  width: 100%;
+  max-width: 80vw;
+  display: flex;
+  flex-direction: column;
+  gap: 1.5vh;
+}
+
+.list .row {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 2vw;
+  padding: 1.5vh 2vw;
+  background: var(--bg-alt);
+  border-radius: 1vw;
+  font-size: 2.2vw;
+  text-align: left;
+}
+
+.list .row .secondary {
+  color: var(--muted);
+  white-space: nowrap;
+}
+
+/* ---------- Overlay fixo (marca + relógio) ---------- */
+
+#overlay {
+  position: absolute;
+  inset: 3vh 3vw auto 3vw;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  font-size: 1.6vw;
+  color: var(--muted);
+  pointer-events: none;
+}
+
+#brand { font-weight: 600; letter-spacing: 0.1vw; }
+
+#clock { text-align: right; line-height: 1.2; }
+#time { display: block; font-size: 2.6vw; font-weight: 600; color: var(--fg); }
+
+/* ---------- Barra de progresso do slide ---------- */
+
+#progress {
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  width: 100%;
+  height: 0.6vh;
+  background: rgba(255, 255, 255, 0.08);
+}
+
+#progress-bar {
+  height: 100%;
+  width: 0;
+  background: var(--accent);
+}
+
+/* ---------- Mensagens de estado (carregando, erro) ---------- */
+
+#status {
+  position: absolute;
+  left: 50%;
+  bottom: 5vh;
+  transform: translateX(-50%);
+  padding: 1vh 2vw;
+  border-radius: 1vw;
+  background: rgba(0, 0, 0, 0.6);
+  font-size: 1.6vw;
+  color: var(--muted);
+}
+
+.hidden { display: none; }

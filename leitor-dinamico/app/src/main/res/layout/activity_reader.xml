@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/reader_root"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/reader_background">
+
+    <!-- A palavra. Fica sozinha no centro, sem nada competindo com ela. -->
+    <TextView
+        android:id="@+id/word"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:paddingStart="24dp"
+        android:paddingEnd="24dp"
+        android:gravity="center"
+        android:maxLines="1"
+        android:textColor="@color/reader_word"
+        android:textStyle="bold"
+        android:fontFamily="sans-serif"
+        android:textSize="64sp"
+        android:text="" />
+
+    <!-- Velocidade: discreta parada, acesa enquanto o dedo está pressionado. -->
+    <TextView
+        android:id="@+id/hud_speed"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="top|end"
+        android:padding="16dp"
+        android:textColor="@color/reader_hud"
+        android:textSize="13sp"
+        android:text="" />
+
+    <TextView
+        android:id="@+id/hud_progress"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="bottom|center_horizontal"
+        android:padding="14dp"
+        android:textColor="@color/reader_hud"
+        android:textSize="13sp"
+        android:text="" />
+
+    <TextView
+        android:id="@+id/hint"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="top|start"
+        android:padding="16dp"
+        android:lineSpacingExtra="3dp"
+        android:textColor="@color/reader_hud"
+        android:textSize="13sp"
+        android:text="" />
+
+    <ProgressBar
+        android:id="@+id/loading"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:indeterminateTint="@color/reader_hud" />
+
+    <!-- Trilho de progresso do livro, colado na base. -->
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="2dp"
+        android:layout_gravity="bottom"
+        android:background="@color/surface" />
+
+    <View
+        android:id="@+id/progress_bar"
+        android:layout_width="0dp"
+        android:layout_height="2dp"
+        android:layout_gravity="bottom|start"
+        android:background="@color/reader_progress" />
+
+</FrameLayout>

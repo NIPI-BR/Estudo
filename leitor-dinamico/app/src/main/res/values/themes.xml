@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources xmlns:tools="http://schemas.android.com/tools">
+
+    <!-- O app inteiro é escuro: a biblioteca acompanha a tela de leitura. -->
+    <style name="Theme.LeitorDinamico" parent="Theme.Material3.Dark.NoActionBar">
+        <item name="android:windowBackground">@color/background</item>
+        <item name="colorPrimary">@color/white</item>
+        <item name="colorOnPrimary">@color/background</item>
+        <item name="colorSurface">@color/surface</item>
+        <item name="colorOnSurface">@color/white</item>
+        <item name="android:statusBarColor">@color/background</item>
+        <item name="android:navigationBarColor">@color/background</item>
+    </style>
+
+    <!-- Tela de leitura: preto puro, sem nenhuma decoração. -->
+    <style name="Theme.LeitorDinamico.Reader" parent="Theme.LeitorDinamico">
+        <item name="android:windowBackground">@color/reader_background</item>
+        <item name="android:statusBarColor">@color/reader_background</item>
+        <item name="android:navigationBarColor">@color/reader_background</item>
+        <item name="android:windowLayoutInDisplayCutoutMode" tools:targetApi="27">shortEdges</item>
+    </style>
+
+</resources>

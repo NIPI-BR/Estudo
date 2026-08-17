@@ -1,0 +1,824 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="description" content="Leitor de livros palavra a palavra: segure para as palavras passarem na velocidade que você escolher.">
+<meta name="theme-color" content="#000000">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black">
+<meta name="apple-mobile-web-app-title" content="Leitor Dinâmico">
+<link rel="manifest" href="manifest.json">
+<link rel="icon" href="icone-192.png" type="image/png">
+<link rel="apple-touch-icon" href="icone-192.png">
+<title>Leitor Dinâmico NIPI</title>
+
+<style>
+  /* Preto e branco por especificação: a tela de leitura é a mesma do app. */
+  :root {
+    --preto: #000000;
+    --fundo: #0A0A0A;
+    --superficie: #1A1A1A;
+    --branco: #FFFFFF;
+    --apagado: #8A8A8A;
+    --tenue: #4A4A4A;
+    --borda: #262626;
+    --sans: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  html, body {
+    height: 100%;
+    background: var(--fundo);
+    color: var(--branco);
+    font-family: var(--sans);
+    overscroll-behavior: none;
+  }
+
+  body { display: flex; flex-direction: column; }
+
+  /* ---------------- Biblioteca ---------------- */
+
+  #biblioteca {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    max-width: 34rem;
+    width: 100%;
+    margin: 0 auto;
+    padding: 1.5rem 1.25rem 1.25rem;
+    gap: 1.25rem;
+    overflow-y: auto;
+  }
+
+  h1 { font-size: 1.5rem; font-weight: 600; letter-spacing: -0.01em; }
+
+  .subtitulo { color: var(--apagado); font-size: 0.88rem; line-height: 1.5; }
+
+  .lista { display: flex; flex-direction: column; gap: 0.5rem; }
+
+  .livro {
+    background: var(--superficie);
+    border: 1px solid var(--borda);
+    border-radius: 10px;
+    padding: 0.9rem 1rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.45rem;
+    cursor: pointer;
+    text-align: left;
+    color: inherit;
+    font: inherit;
+    width: 100%;
+  }
+
+  .livro:active { border-color: var(--apagado); }
+
+  .livro .titulo { font-size: 1rem; font-weight: 600; overflow-wrap: anywhere; }
+  .livro .meta { font-size: 0.78rem; color: var(--apagado); font-variant-numeric: tabular-nums; }
+
+  .trilho { height: 3px; background: #2A2A2A; border-radius: 2px; overflow: hidden; }
+  .trilho span { display: block; height: 100%; background: var(--apagado); }
+
+  .acoes { display: flex; gap: 0.5rem; align-items: center; }
+
+  button.principal, label.principal {
+    flex: 1;
+    background: var(--branco);
+    color: var(--preto);
+    border: none;
+    border-radius: 10px;
+    padding: 0.95rem 1rem;
+    font-size: 0.95rem;
+    font-weight: 600;
+    font-family: inherit;
+    cursor: pointer;
+    text-align: center;
+  }
+
+  button.secundaria {
+    background: transparent;
+    color: var(--apagado);
+    border: 1px solid var(--borda);
+    border-radius: 10px;
+    padding: 0.95rem 1rem;
+    font-size: 0.95rem;
+    font-family: inherit;
+    cursor: pointer;
+  }
+
+  input[type="file"] { display: none; }
+
+  .ajustes {
+    background: var(--superficie);
+    border: 1px solid var(--borda);
+    border-radius: 10px;
+    padding: 1rem;
+    display: flex;
+    flex-direction: column;
+    gap: 1.1rem;
+  }
+
+  .ajuste { display: flex; flex-direction: column; gap: 0.35rem; }
+
+  .ajuste .rotulo {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    font-size: 0.88rem;
+  }
+
+  .ajuste .valor { color: var(--apagado); font-variant-numeric: tabular-nums; }
+
+  .ajuste .dica { font-size: 0.75rem; color: var(--tenue); line-height: 1.4; }
+
+  input[type="range"] { width: 100%; accent-color: var(--branco); }
+
+  .aviso {
+    font-size: 0.78rem;
+    color: var(--tenue);
+    line-height: 1.5;
+    border-left: 2px solid var(--borda);
+    padding-left: 0.75rem;
+  }
+
+  /* ---------------- Leitor ---------------- */
+
+  #leitor {
+    position: fixed;
+    inset: 0;
+    background: var(--preto);
+    display: none;
+    touch-action: none;
+    user-select: none;
+    -webkit-user-select: none;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  #leitor.ativo { display: block; }
+
+  #palavra {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    color: var(--branco);
+    font-weight: 700;
+    font-size: 12vw;
+    white-space: nowrap;
+    letter-spacing: -0.02em;
+    pointer-events: none;
+  }
+
+  .hud {
+    position: absolute;
+    color: var(--tenue);
+    font-size: 0.75rem;
+    font-variant-numeric: tabular-nums;
+    pointer-events: none;
+    transition: color 120ms linear;
+  }
+
+  #hud-velocidade { top: 0.85rem; right: 1rem; }
+  #hud-velocidade.pressionado { color: var(--branco); }
+  #hud-progresso { bottom: 0.85rem; left: 50%; transform: translateX(-50%); }
+
+  #dica-leitor {
+    position: absolute;
+    top: 0.85rem;
+    left: 1rem;
+    color: var(--tenue);
+    font-size: 0.75rem;
+    line-height: 1.6;
+    pointer-events: none;
+    transition: opacity 400ms ease;
+  }
+
+  #sair {
+    position: absolute;
+    bottom: 0.4rem;
+    left: 0.4rem;
+    background: transparent;
+    border: none;
+    color: var(--tenue);
+    font-family: inherit;
+    font-size: 0.75rem;
+    padding: 0.6rem 0.8rem;
+    cursor: pointer;
+    z-index: 3;
+  }
+
+  #barra-fundo { position: absolute; left: 0; right: 0; bottom: 0; height: 2px; background: #1C1C1C; }
+  #barra { position: absolute; left: 0; bottom: 0; height: 2px; width: 0; background: var(--apagado); }
+
+  /* Zonas de toque: metade esquerda volta, metade direita avança. */
+  .zona { position: absolute; top: 0; bottom: 0; width: 50%; z-index: 2; }
+  #zona-esquerda { left: 0; }
+  #zona-direita { right: 0; }
+
+  #importando {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.88);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    padding: 2rem;
+    font-size: 0.95rem;
+    color: var(--branco);
+    z-index: 10;
+  }
+
+  #importando.ativo { display: flex; }
+
+  @media (prefers-reduced-motion: reduce) {
+    * { transition: none !important; }
+  }
+</style>
+</head>
+<body>
+<div id="biblioteca">
+  <div>
+    <h1>Leitor Dinâmico NIPI</h1>
+    <p class="subtitulo">Prova da mecânica, para rodar no navegador do celular. Deite o telefone, segure a direita para avançar e a esquerda para voltar.</p>
+  </div>
+
+  <div class="acoes">
+    <label class="principal" for="arquivo">Adicionar livro</label>
+    <input id="arquivo" type="file" accept=".txt,.epub,.md,.html,text/plain,application/epub+zip">
+    <button class="secundaria" id="btn-exemplo">Texto de exemplo</button>
+  </div>
+
+  <div class="lista" id="lista"></div>
+
+  <div class="ajustes">
+    <div class="ajuste">
+      <div class="rotulo"><span>Velocidade</span><span class="valor"><span id="v-ppm">400</span> ppm</span></div>
+      <input type="range" id="ppm" min="60" max="1000" step="10" value="400">
+      <p class="dica">Leitura comum fica perto de 250. Comece em 400 e vá subindo.</p>
+    </div>
+
+    <div class="ajuste">
+      <div class="rotulo"><span>Retrocesso do toque duplo</span><span class="valor"><span id="v-retro">15</span> palavras</span></div>
+      <input type="range" id="retro" min="5" max="100" step="5" value="15">
+      <p class="dica">Quantas palavras voltar ao tocar duas vezes na esquerda.</p>
+    </div>
+
+    <div class="ajuste">
+      <div class="rotulo"><span>Tamanho da palavra</span><span class="valor"><span id="v-tam">12</span>% da tela</span></div>
+      <input type="range" id="tam" min="6" max="22" step="1" value="12">
+      <p class="dica">Palavras longas encolhem sozinhas para caber.</p>
+    </div>
+
+    <div class="ajuste">
+      <div class="rotulo">
+        <span>Pausar na pontuação</span>
+        <input type="checkbox" id="pontuacao" checked style="width:auto;accent-color:#fff">
+      </div>
+      <p class="dica">Segura um instante a mais na vírgula e no ponto final.</p>
+    </div>
+  </div>
+
+  <p class="aviso">Esta é a versão de navegador, para você sentir o ritmo. Ela abre <strong>EPUB</strong> e <strong>texto simples</strong>; <strong>PDF só no app Android</strong>, que usa uma biblioteca que não existe no navegador. Os livros e a posição de leitura ficam guardados neste navegador.</p>
+</div>
+
+<div id="leitor">
+  <div id="palavra"></div>
+  <div class="hud" id="hud-velocidade"></div>
+  <div class="hud" id="hud-progresso"></div>
+  <div id="dica-leitor"></div>
+  <div id="barra-fundo"></div>
+  <div id="barra"></div>
+  <div class="zona" id="zona-esquerda"></div>
+  <div class="zona" id="zona-direita"></div>
+  <button id="sair">← livros</button>
+</div>
+
+<div id="importando"><span id="importando-texto">Importando…</span></div>
+
+<script>
+(function () {
+  'use strict';
+
+  /* ================================================================
+     Armazenamento — IndexedDB, porque o texto de um livro passa
+     folgado do limite do localStorage.
+     ================================================================ */
+
+  var BANCO = 'leitor-dinamico';
+  var bancoAberto = null;
+
+  function abrirBanco() {
+    if (bancoAberto) return bancoAberto;
+    bancoAberto = new Promise(function (resolve, reject) {
+      var req = indexedDB.open(BANCO, 1);
+      req.onupgradeneeded = function () {
+        req.result.createObjectStore('livros', { keyPath: 'id' });
+      };
+      req.onsuccess = function () { resolve(req.result); };
+      req.onerror = function () { reject(req.error); };
+    });
+    return bancoAberto;
+  }
+
+  function transacao(modo, acao) {
+    return abrirBanco().then(function (db) {
+      return new Promise(function (resolve, reject) {
+        var tx = db.transaction('livros', modo);
+        var req = acao(tx.objectStore('livros'));
+        req.onsuccess = function () { resolve(req.result); };
+        req.onerror = function () { reject(req.error); };
+      });
+    });
+  }
+
+  var salvarLivro = function (livro) { return transacao('readwrite', function (s) { return s.put(livro); }); };
+  var lerLivros = function () { return transacao('readonly', function (s) { return s.getAll(); }); };
+  var lerLivro = function (id) { return transacao('readonly', function (s) { return s.get(id); }); };
+  var apagarLivro = function (id) { return transacao('readwrite', function (s) { return s.delete(id); }); };
+
+  /* ================================================================
+     Preferências
+     ================================================================ */
+
+  var prefs = {
+    ppm: 400,
+    retrocesso: 15,
+    tamanho: 12,
+    pontuacao: true
+  };
+
+  try {
+    var guardado = localStorage.getItem('leitor-prefs');
+    if (guardado) prefs = Object.assign(prefs, JSON.parse(guardado));
+  } catch (e) { /* primeiro uso */ }
+
+  function salvarPrefs() {
+    try { localStorage.setItem('leitor-prefs', JSON.stringify(prefs)); } catch (e) {}
+  }
+
+  /* ================================================================
+     Leitura de EPUB sem biblioteca externa.
+
+     Um EPUB é um ZIP. Aqui o ZIP é lido na mão — diretório central,
+     depois cada arquivo — e o conteúdo comprimido é descomprimido
+     pelo próprio navegador com DecompressionStream.
+     ================================================================ */
+
+  function lerU16(v, p) { return v.getUint16(p, true); }
+  function lerU32(v, p) { return v.getUint32(p, true); }
+
+  function abrirZip(buffer) {
+    var bytes = new Uint8Array(buffer);
+    var visao = new DataView(buffer);
+
+    // O fim do diretório central fica no rodapé do arquivo.
+    var fim = -1;
+    var limite = Math.max(0, bytes.length - 66000);
+    for (var i = bytes.length - 22; i >= limite; i--) {
+      if (lerU32(visao, i) === 0x06054b50) { fim = i; break; }
+    }
+    if (fim < 0) throw new Error('não parece um arquivo EPUB');
+
+    var total = lerU16(visao, fim + 10);
+    var ponteiro = lerU32(visao, fim + 16);
+    var entradas = {};
+
+    for (var n = 0; n < total; n++) {
+      if (lerU32(visao, ponteiro) !== 0x02014b50) break;
+      var metodo = lerU16(visao, ponteiro + 10);
+      var comprimido = lerU32(visao, ponteiro + 20);
+      var tamNome = lerU16(visao, ponteiro + 28);
+      var tamExtra = lerU16(visao, ponteiro + 30);
+      var tamComentario = lerU16(visao, ponteiro + 32);
+      var deslocamento = lerU32(visao, ponteiro + 42);
+      var nome = new TextDecoder('utf-8').decode(bytes.subarray(ponteiro + 46, ponteiro + 46 + tamNome));
+
+      entradas[nome] = { metodo: metodo, comprimido: comprimido, deslocamento: deslocamento };
+      ponteiro += 46 + tamNome + tamExtra + tamComentario;
+    }
+
+    return {
+      tem: function (nome) { return Object.prototype.hasOwnProperty.call(entradas, nome); },
+      nomes: function () { return Object.keys(entradas); },
+      ler: function (nome) {
+        var e = entradas[nome];
+        if (!e) return Promise.resolve(null);
+
+        // O cabeçalho local repete o nome e os extras, com tamanhos próprios.
+        var base = e.deslocamento;
+        if (lerU32(visao, base) !== 0x04034b50) return Promise.resolve(null);
+        var inicio = base + 30 + lerU16(visao, base + 26) + lerU16(visao, base + 28);
+        var dados = bytes.subarray(inicio, inicio + e.comprimido);
+
+        if (e.metodo === 0) return Promise.resolve(dados);
+        if (e.metodo !== 8) return Promise.resolve(null);
+
+        var fluxo = new Blob([dados]).stream()
+          .pipeThrough(new DecompressionStream('deflate-raw'));
+        return new Response(fluxo).arrayBuffer().then(function (b) { return new Uint8Array(b); });
+      }
+    };
+  }
+
+  function texto(bytes) {
+    return bytes ? new TextDecoder('utf-8').decode(bytes) : '';
+  }
+
+  /** Resolve um href relativo ao OPF, incluindo os "../" que alguns EPUBs usam. */
+  function resolverCaminho(base, href) {
+    var limpo = decodeURIComponent(href.split('#')[0]);
+    var partes = base ? base.split('/') : [];
+    limpo.split('/').forEach(function (seg) {
+      if (seg === '' || seg === '.') return;
+      if (seg === '..') partes.pop();
+      else partes.push(seg);
+    });
+    return partes.join('/');
+  }
+
+  function htmlParaTexto(html) {
+    var doc = new DOMParser().parseFromString(html, 'text/html');
+    doc.querySelectorAll('script, style, head').forEach(function (el) { el.remove(); });
+    return doc.body ? doc.body.textContent : '';
+  }
+
+  async function extrairEpub(buffer, aviso) {
+    var zip = abrirZip(buffer);
+
+    var container = texto(await zip.ler('META-INF/container.xml'));
+    var raiz = new DOMParser().parseFromString(container, 'application/xml')
+      .querySelector('rootfile');
+    var caminhoOpf = raiz && raiz.getAttribute('full-path');
+    if (!caminhoOpf) throw new Error('o índice do EPUB está faltando');
+
+    var opf = new DOMParser().parseFromString(texto(await zip.ler(caminhoOpf)), 'application/xml');
+    var pasta = caminhoOpf.indexOf('/') >= 0 ? caminhoOpf.slice(0, caminhoOpf.lastIndexOf('/')) : '';
+
+    // Índice: só o que tem texto. Capa, CSS e imagens ficam de fora.
+    var indice = {};
+    opf.querySelectorAll('manifest > item').forEach(function (item) {
+      var tipo = item.getAttribute('media-type') || '';
+      if (tipo.indexOf('html') >= 0) {
+        indice[item.getAttribute('id')] = item.getAttribute('href');
+      }
+    });
+
+    // Espinha: a ordem correta de leitura dos capítulos.
+    var espinha = [];
+    opf.querySelectorAll('spine > itemref').forEach(function (ref) {
+      espinha.push(ref.getAttribute('idref'));
+    });
+
+    var partes = [];
+    for (var i = 0; i < espinha.length; i++) {
+      aviso('Capítulo ' + (i + 1) + ' de ' + espinha.length);
+      var href = indice[espinha[i]];
+      if (!href) continue;
+      var caminho = resolverCaminho(pasta, href);
+      if (!zip.tem(caminho)) continue;
+      partes.push(htmlParaTexto(texto(await zip.ler(caminho))));
+    }
+
+    return partes.join('\n');
+  }
+
+  /** Junta hifenização de fim de linha e reduz o espaço em branco. */
+  function normalizar(bruto) {
+    return bruto
+      .replace(/ /g, ' ')
+      .replace(/﻿/g, ' ')
+      .replace(/(\p{L})-\s*\n\s*(\p{L})/gu, '$1$2')
+      .replace(/[ \t\r]+/g, ' ')
+      .replace(/\n{2,}/g, '\n')
+      .trim();
+  }
+
+  /* ================================================================
+     Importação
+     ================================================================ */
+
+  var caixaImport = document.getElementById('importando');
+  var textoImport = document.getElementById('importando-texto');
+
+  function aviso(mensagem) {
+    textoImport.textContent = mensagem;
+  }
+
+  async function importar(arquivo) {
+    caixaImport.classList.add('ativo');
+    aviso('Lendo o arquivo…');
+
+    try {
+      var conteudo;
+      if (/\.epub$/i.test(arquivo.name)) {
+        conteudo = await extrairEpub(await arquivo.arrayBuffer(), aviso);
+      } else {
+        conteudo = await arquivo.text();
+        if (/\.(html?|xhtml)$/i.test(arquivo.name)) conteudo = htmlParaTexto(conteudo);
+      }
+
+      var palavras = normalizar(conteudo).split(/\s+/).filter(Boolean);
+      if (!palavras.length) throw new Error('não encontrei texto neste arquivo');
+
+      var livro = {
+        id: 'livro_' + Date.now(),
+        titulo: arquivo.name.replace(/\.[^.]+$/, ''),
+        palavras: palavras,
+        posicao: 0,
+        criadoEm: Date.now()
+      };
+      await salvarLivro(livro);
+      await desenharLista();
+      caixaImport.classList.remove('ativo');
+      abrirLeitor(livro);
+    } catch (erro) {
+      caixaImport.classList.remove('ativo');
+      alert('Não consegui ler este arquivo: ' + (erro.message || erro));
+    }
+  }
+
+  document.getElementById('arquivo').addEventListener('change', function (e) {
+    var arquivo = e.target.files && e.target.files[0];
+    if (arquivo) importar(arquivo);
+    e.target.value = '';
+  });
+
+  document.getElementById('btn-exemplo').addEventListener('click', async function () {
+    var exemplo = 'A leitura comum gasta boa parte do tempo em movimentos que não têm nada a ver ' +
+      'com entender o texto. O olho salta de um ponto a outro, volta atrás sem necessidade, ' +
+      'procura de novo onde estava. Num leitor de rajada, a palavra vem até você, sempre no ' +
+      'mesmo lugar da tela, e esses movimentos simplesmente deixam de existir. O que sobra é ' +
+      'o trabalho de compreender. Comece devagar, em torno de trezentas palavras por minuto, ' +
+      'e vá subindo aos poucos até achar o ponto em que ainda entende tudo. Se passar desse ' +
+      'ponto, as palavras continuam aparecendo, mas o sentido some, e não adianta nada ler ' +
+      'depressa sem entender. Solte o dedo quando quiser pensar: nada se perde, e a posição ' +
+      'fica guardada exatamente onde você parou.';
+
+    var livro = {
+      id: 'livro_' + Date.now(),
+      titulo: 'Texto de exemplo',
+      palavras: exemplo.split(/\s+/).filter(Boolean),
+      posicao: 0,
+      criadoEm: Date.now()
+    };
+    await salvarLivro(livro);
+    await desenharLista();
+    abrirLeitor(livro);
+  });
+
+  /* ================================================================
+     Biblioteca
+     ================================================================ */
+
+  var lista = document.getElementById('lista');
+
+  function formatar(n) { return n.toLocaleString('pt-BR'); }
+
+  async function desenharLista() {
+    var livros = (await lerLivros()).sort(function (a, b) { return b.criadoEm - a.criadoEm; });
+    lista.innerHTML = '';
+
+    livros.forEach(function (livro) {
+      var pct = Math.round((livro.posicao + 1) / livro.palavras.length * 100);
+
+      var cartao = document.createElement('button');
+      cartao.className = 'livro';
+      cartao.type = 'button';
+
+      var titulo = document.createElement('div');
+      titulo.className = 'titulo';
+      titulo.textContent = livro.titulo;
+
+      var meta = document.createElement('div');
+      meta.className = 'meta';
+      meta.textContent = pct + '% lido · ' + formatar(livro.palavras.length) + ' palavras';
+
+      var trilho = document.createElement('div');
+      trilho.className = 'trilho';
+      var preenchido = document.createElement('span');
+      preenchido.style.width = pct + '%';
+      trilho.appendChild(preenchido);
+
+      cartao.appendChild(titulo);
+      cartao.appendChild(meta);
+      cartao.appendChild(trilho);
+
+      cartao.addEventListener('click', function () { abrirLeitor(livro); });
+      cartao.addEventListener('contextmenu', function (e) {
+        e.preventDefault();
+        if (confirm('Excluir “' + livro.titulo + '” e a posição de leitura?')) {
+          apagarLivro(livro.id).then(desenharLista);
+        }
+      });
+
+      lista.appendChild(cartao);
+    });
+  }
+
+  /* ================================================================
+     Leitor
+     ================================================================ */
+
+  var telaLeitor = document.getElementById('leitor');
+  var elPalavra = document.getElementById('palavra');
+  var elVelocidade = document.getElementById('hud-velocidade');
+  var elProgresso = document.getElementById('hud-progresso');
+  var elDica = document.getElementById('dica-leitor');
+  var elBarra = document.getElementById('barra');
+
+  var atual = null;
+  var indice = 0;
+  var direcao = 0;
+  var cronometro = null;
+  var ultimoToqueEsquerda = 0;
+  var indiceNoToque = 0;
+  var travaTela = null;
+
+  function intervalo() { return 60000 / prefs.ppm; }
+
+  function esperaDepoisDaPalavra() {
+    var base = intervalo();
+    if (!prefs.pontuacao) return base;
+    var palavra = atual.palavras[indice] || '';
+    var fim = palavra.charAt(palavra.length - 1);
+    if ('.!?…:;'.indexOf(fim) >= 0) return base * 2;
+    if (',—–'.indexOf(fim) >= 0) return base * 1.5;
+    return base;
+  }
+
+  function mostrar() {
+    var palavra = atual.palavras[indice] || '';
+    elPalavra.textContent = palavra;
+
+    // Palavra longa encolhe para caber na largura da tela.
+    elPalavra.style.fontSize = prefs.tamanho + 'vw';
+    var largura = elPalavra.offsetWidth;
+    var disponivel = window.innerWidth * 0.92;
+    if (largura > disponivel) {
+      elPalavra.style.fontSize = (prefs.tamanho * disponivel / largura) + 'vw';
+    }
+
+    var pct = Math.round((indice + 1) / atual.palavras.length * 100);
+    elVelocidade.textContent = prefs.ppm + ' ppm';
+    elProgresso.textContent = formatar(indice + 1) + ' de ' + formatar(atual.palavras.length) + ' · ' + pct + '%';
+    elBarra.style.width = pct + '%';
+  }
+
+  function passo() {
+    var proximo = indice + direcao;
+    if (proximo < 0 || proximo >= atual.palavras.length) return false;
+    indice = proximo;
+    mostrar();
+    return true;
+  }
+
+  function agendar() {
+    cronometro = setTimeout(function () {
+      if (!passo()) { parar(); return; }
+      agendar();
+    }, esperaDepoisDaPalavra());
+  }
+
+  function comecar(novaDirecao) {
+    clearTimeout(cronometro);
+    direcao = novaDirecao;
+    elVelocidade.classList.add('pressionado');
+    elDica.style.opacity = '0';
+    // A primeira palavra sai no toque: sem isso a leitura parece travada.
+    if (passo()) agendar();
+  }
+
+  function parar() {
+    clearTimeout(cronometro);
+    cronometro = null;
+    direcao = 0;
+    elVelocidade.classList.remove('pressionado');
+    salvarPosicao();
+  }
+
+  function salvarPosicao() {
+    if (!atual) return;
+    atual.posicao = indice;
+    salvarLivro(atual);
+  }
+
+  document.getElementById('zona-direita').addEventListener('pointerdown', function (e) {
+    e.preventDefault();
+    ultimoToqueEsquerda = 0;
+    comecar(1);
+  });
+
+  document.getElementById('zona-esquerda').addEventListener('pointerdown', function (e) {
+    e.preventDefault();
+    var agora = Date.now();
+
+    if (agora - ultimoToqueEsquerda <= 320) {
+      // Volta a partir de onde estávamos no primeiro toque, e não de onde o
+      // primeiro toque já tinha andado — senão o salto perde palavras.
+      clearTimeout(cronometro);
+      direcao = 0;
+      elVelocidade.classList.remove('pressionado');
+      indice = Math.max(0, indiceNoToque - prefs.retrocesso);
+      ultimoToqueEsquerda = 0;
+      mostrar();
+      salvarPosicao();
+      return;
+    }
+
+    ultimoToqueEsquerda = agora;
+    indiceNoToque = indice;
+    comecar(-1);
+  });
+
+  ['pointerup', 'pointercancel', 'pointerleave'].forEach(function (evento) {
+    telaLeitor.addEventListener(evento, function () { if (direcao !== 0) parar(); });
+  });
+
+  function abrirLeitor(livro) {
+    atual = livro;
+    indice = Math.min(Math.max(livro.posicao || 0, 0), livro.palavras.length - 1);
+
+    telaLeitor.classList.add('ativo');
+    document.getElementById('biblioteca').style.display = 'none';
+
+    elDica.innerHTML = 'Segure à direita para avançar, à esquerda para voltar.<br>' +
+      'Toque duas vezes à esquerda para voltar ' + prefs.retrocesso + ' palavras.';
+    elDica.style.opacity = '1';
+    setTimeout(function () { elDica.style.opacity = '0'; }, 5000);
+
+    mostrar();
+    manterTelaAcesa();
+    tentarPaisagem();
+  }
+
+  function fecharLeitor() {
+    parar();
+    telaLeitor.classList.remove('ativo');
+    document.getElementById('biblioteca').style.display = '';
+    atual = null;
+    soltarTela();
+    desenharLista();
+  }
+
+  document.getElementById('sair').addEventListener('click', fecharLeitor);
+
+  // Extras que dependem do navegador; se não houver, o leitor funciona igual.
+  function manterTelaAcesa() {
+    if (!navigator.wakeLock) return;
+    navigator.wakeLock.request('screen').then(function (t) { travaTela = t; }).catch(function () {});
+  }
+
+  function soltarTela() {
+    if (travaTela) { travaTela.release().catch(function () {}); travaTela = null; }
+  }
+
+  function tentarPaisagem() {
+    try {
+      if (screen.orientation && screen.orientation.lock) {
+        screen.orientation.lock('landscape').catch(function () {});
+      }
+    } catch (e) {}
+  }
+
+  window.addEventListener('resize', function () { if (atual) mostrar(); });
+  document.addEventListener('visibilitychange', function () {
+    if (document.hidden && direcao !== 0) parar();
+  });
+
+  /* ================================================================
+     Ajustes
+     ================================================================ */
+
+  function ligarControle(id, campo, saidaId, aoMudar) {
+    var controle = document.getElementById(id);
+    var saida = document.getElementById(saidaId);
+    controle.value = prefs[campo];
+    saida.textContent = prefs[campo];
+    controle.addEventListener('input', function () {
+      prefs[campo] = Number(controle.value);
+      saida.textContent = controle.value;
+      salvarPrefs();
+      if (aoMudar) aoMudar();
+    });
+  }
+
+  ligarControle('ppm', 'ppm', 'v-ppm');
+  ligarControle('retro', 'retrocesso', 'v-retro');
+  ligarControle('tam', 'tamanho', 'v-tam', function () { if (atual) mostrar(); });
+
+  var caixaPontuacao = document.getElementById('pontuacao');
+  caixaPontuacao.checked = prefs.pontuacao;
+  caixaPontuacao.addEventListener('change', function () {
+    prefs.pontuacao = caixaPontuacao.checked;
+    salvarPrefs();
+  });
+
+  desenharLista();
+})();
+</script>
+</body>
+</html>

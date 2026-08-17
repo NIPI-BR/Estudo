@@ -1,0 +1,41 @@
+{
+  "brand": "NIPI · Painel",
+  "defaultDuration": 12,
+  "refreshSeconds": 300,
+  "slides": [
+    {
+      "type": "text",
+      "title": "Bom dia!",
+      "subtitle": "Painel de avisos",
+      "body": "Edite o arquivo content/slides.json para trocar o que aparece aqui. O painel recarrega o conteúdo sozinho a cada 5 minutos.",
+      "duration": 10
+    },
+    {
+      "type": "metrics",
+      "title": "Números da semana",
+      "duration": 15,
+      "items": [
+        { "label": "Pedidos", "value": "128", "status": "ok" },
+        { "label": "Em atraso", "value": "3", "status": "warn" },
+        { "label": "Faturamento", "value": "R$ 42k", "status": "ok" },
+        { "label": "Chamados abertos", "value": "7", "status": "danger" }
+      ]
+    },
+    {
+      "type": "list",
+      "title": "Agenda de hoje",
+      "duration": 15,
+      "items": [
+        { "text": "Reunião de alinhamento", "secondary": "09:00" },
+        { "text": "Visita técnica — Cliente A", "secondary": "11:30" },
+        { "text": "Fechamento do estoque", "secondary": "17:00" }
+      ]
+    },
+    {
+      "type": "image",
+      "url": "https://placehold.co/1920x1080/0b1020/f5f7ff/png?text=Sua+imagem+aqui",
+      "fit": "contain",
+      "duration": 10
+    }
+  ]
+}
