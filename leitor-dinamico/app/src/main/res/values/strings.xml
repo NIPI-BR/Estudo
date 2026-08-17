@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Leitor Dinâmico NIPI</string>
+
+    <string name="library_title">Meus livros</string>
+    <string name="add_book">Adicionar livro</string>
+    <string name="settings">Configurações</string>
+    <string name="settings_title">Configurações</string>
+    <string name="empty_library">Nenhum livro ainda.\n\nToque em “Adicionar livro” para importar um EPUB, PDF ou TXT.</string>
+
+    <string name="importing">Importando…</string>
+    <string name="reading_file">Lendo o arquivo…</string>
+    <string name="import_failed">Não foi possível ler este arquivo: %1$s</string>
+    <string name="import_empty">Não encontrei texto neste arquivo. Se for um PDF escaneado, as páginas são imagens e não têm texto para extrair.</string>
+
+    <string name="delete_book_title">Excluir livro</string>
+    <string name="delete_book_message">Excluir “%1$s” e a posição de leitura?</string>
+    <string name="delete">Excluir</string>
+    <string name="cancel">Cancelar</string>
+
+    <string name="words_progress">%1$s de %2$s palavras · %3$d%%</string>
+    <string name="book_progress">%1$d%% lido · %2$s palavras</string>
+    <string name="reader_hint">Segure à direita para avançar, à esquerda para voltar.\nToque duas vezes à esquerda para voltar %1$d palavras.</string>
+
+    <string name="wpm_label">Velocidade</string>
+    <string name="wpm_value">%1$d palavras por minuto</string>
+    <string name="wpm_short">%1$d ppm</string>
+    <string name="wpm_help">Leitura comum fica perto de 250. Comece em 400 e vá subindo.</string>
+
+    <string name="rewind_label">Retrocesso do toque duplo</string>
+    <string name="rewind_value">%1$d palavras</string>
+    <string name="rewind_help">Quantas palavras voltar quando você toca duas vezes no lado esquerdo.</string>
+
+    <string name="font_label">Tamanho da palavra</string>
+    <string name="font_value">%1$d pontos</string>
+    <string name="font_help">Palavras longas encolhem sozinhas para caber na tela.</string>
+
+    <string name="punctuation_label">Pausar na pontuação</string>
+    <string name="punctuation_help">Segura um instante a mais na vírgula e no ponto final. Ajuda bastante a entender o texto.</string>
+</resources>
