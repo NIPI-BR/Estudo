@@ -1,0 +1,603 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="theme-color" content="#0b1220">
+<title>NIPI OBD — Scanner de Diagnóstico</title>
+<style>
+  :root{
+    --bg:#0b1220; --panel:#121c2e; --panel-2:#0f1826; --line:#22314b;
+    --ink:#e8eef7; --ink-soft:#9fb0c9; --accent:#3ea6ff; --accent-2:#1f6feb;
+    --ok:#2ecc71; --warn:#f1c40f; --bad:#ff5252; --info:#8a7dff;
+    --radius:14px; --shadow:0 10px 30px rgba(0,0,0,.35);
+    color-scheme: dark;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html,body{height:100%}
+  body{
+    font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+    background:radial-gradient(1200px 600px at 50% -10%,#16233b,var(--bg));
+    color:var(--ink); line-height:1.45; -webkit-font-smoothing:antialiased;
+    padding-bottom:env(safe-area-inset-bottom);
+  }
+  .wrap{max-width:820px;margin:0 auto;padding:14px 14px 40px}
+  header.top{
+    display:flex;align-items:center;gap:12px;padding:8px 4px 14px;
+  }
+  .logo{width:40px;height:40px;border-radius:11px;flex:none;display:grid;place-items:center;
+    background:linear-gradient(135deg,var(--accent),var(--accent-2));color:#04101f;font-weight:800;font-size:15px}
+  .top h1{font-size:1.12rem;line-height:1.05}
+  .top .sub{font-size:.72rem;color:var(--ink-soft);letter-spacing:.12em;text-transform:uppercase}
+  .status-chip{margin-left:auto;display:flex;align-items:center;gap:8px;font-size:.8rem;
+    background:var(--panel);border:1px solid var(--line);padding:7px 12px;border-radius:999px}
+  .dot{width:9px;height:9px;border-radius:50%;background:var(--bad);box-shadow:0 0 0 3px rgba(255,82,82,.15)}
+  .dot.on{background:var(--ok);box-shadow:0 0 0 3px rgba(46,204,113,.15)}
+  .dot.sim{background:var(--info);box-shadow:0 0 0 3px rgba(138,125,255,.15)}
+
+  .card{background:linear-gradient(180deg,var(--panel),var(--panel-2));border:1px solid var(--line);
+    border-radius:var(--radius);box-shadow:var(--shadow);padding:16px;margin-bottom:14px}
+  .card h2{font-size:.95rem;margin-bottom:10px;display:flex;align-items:center;gap:8px}
+  .muted{color:var(--ink-soft);font-size:.85rem}
+
+  .btn-row{display:flex;flex-wrap:wrap;gap:9px}
+  button.btn{
+    appearance:none;border:1px solid var(--line);background:#182642;color:var(--ink);
+    padding:11px 15px;border-radius:11px;font-size:.9rem;font-weight:600;cursor:pointer;
+    display:inline-flex;align-items:center;gap:8px;transition:.15s;flex:1 1 auto;justify-content:center}
+  button.btn:hover{border-color:var(--accent);background:#1d3251}
+  button.btn:disabled{opacity:.4;cursor:not-allowed}
+  button.btn.primary{background:linear-gradient(135deg,var(--accent),var(--accent-2));border:none;color:#04101f}
+  button.btn.ghost{background:transparent}
+  button.btn.danger{border-color:#5a2330;background:#2a1620;color:#ff9b9b}
+  button.btn.danger:hover{border-color:var(--bad)}
+
+  .tabs{display:flex;gap:6px;margin:4px 0 14px;background:var(--panel-2);padding:6px;border-radius:12px;border:1px solid var(--line)}
+  .tab{flex:1;text-align:center;padding:10px;border-radius:9px;font-size:.86rem;font-weight:600;color:var(--ink-soft);cursor:pointer}
+  .tab.active{background:#1d2c49;color:var(--ink)}
+
+  /* DTC list */
+  .dtc{border:1px solid var(--line);border-radius:12px;padding:13px;margin-bottom:10px;background:#101a2b;
+    display:grid;grid-template-columns:auto 1fr;gap:4px 13px;align-items:start}
+  .dtc .code{grid-row:1/3;font-family:ui-monospace,Menlo,Consolas,monospace;font-size:1.15rem;font-weight:700;
+    padding:8px 11px;border-radius:9px;background:#0b1424;border:1px solid var(--line);align-self:center;min-width:78px;text-align:center}
+  .dtc.sev-bad .code{color:var(--bad);border-color:#5a2330}
+  .dtc.sev-warn .code{color:var(--warn);border-color:#5a4d1c}
+  .dtc.sev-info .code{color:var(--accent)}
+  .dtc .desc{font-weight:600;font-size:.95rem}
+  .dtc .meta{color:var(--ink-soft);font-size:.8rem}
+  .badge{display:inline-block;font-size:.66rem;text-transform:uppercase;letter-spacing:.06em;
+    padding:2px 7px;border-radius:6px;border:1px solid var(--line);color:var(--ink-soft);margin-left:6px}
+  .badge.stored{border-color:#5a2330;color:#ff9b9b}
+  .badge.pending{border-color:#5a4d1c;color:var(--warn)}
+  .badge.permanent{border-color:#334;color:#b9c4d8}
+
+  /* live gauges */
+  .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:11px}
+  .g{background:#101a2b;border:1px solid var(--line);border-radius:12px;padding:13px}
+  .g .lbl{font-size:.74rem;color:var(--ink-soft);text-transform:uppercase;letter-spacing:.05em}
+  .g .val{font-size:1.7rem;font-weight:700;font-variant-numeric:tabular-nums;margin-top:3px}
+  .g .val small{font-size:.8rem;color:var(--ink-soft);font-weight:500}
+
+  #console{font-family:ui-monospace,Menlo,Consolas,monospace;font-size:.78rem;background:#070d18;border:1px solid var(--line);
+    border-radius:10px;padding:12px;height:280px;overflow:auto;white-space:pre-wrap;word-break:break-word;color:#bcd}
+  #console .tx{color:var(--accent)} #console .rx{color:#7fd6a0} #console .sy{color:var(--ink-soft)} #console .er{color:var(--bad)}
+
+  .empty{text-align:center;padding:26px 10px;color:var(--ink-soft)}
+  .empty .big{font-size:2.4rem;margin-bottom:6px}
+  .note{font-size:.78rem;color:var(--ink-soft);background:#0d1626;border:1px dashed var(--line);border-radius:10px;padding:10px 12px;margin-top:10px}
+  a{color:var(--accent)}
+  .hide{display:none!important}
+  footer{color:var(--ink-soft);font-size:.74rem;text-align:center;padding:14px 0 4px}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <div class="logo">OBD</div>
+    <div>
+      <h1>Scanner de Diagnóstico</h1>
+      <div class="sub">NIPI · OBD‑II / ELM327</div>
+    </div>
+    <div class="status-chip"><span class="dot" id="statusDot"></span><span id="statusText">Desconectado</span></div>
+  </header>
+
+  <!-- CONEXÃO -->
+  <section class="card" id="connCard">
+    <h2>🔌 Conexão</h2>
+    <div class="btn-row">
+      <button class="btn primary" id="btnDemo">▶ Modo Demonstração</button>
+      <button class="btn" id="btnBle">📶 Bluetooth (BLE)</button>
+      <button class="btn" id="btnSerial">🔗 USB (Serial)</button>
+      <button class="btn ghost danger hide" id="btnDisc">Desconectar</button>
+    </div>
+    <div class="note" id="connNote">
+      <b>Comece pelo Modo Demonstração</b> para ver o app lendo as falhas do seu Fiat Mobi (dados simulados).
+      Para ler o carro de verdade, veja qual é o seu adaptador em <i>“Qual adaptador eu tenho?”</i> abaixo — o tipo
+      de conexão (Bluetooth clássico, BLE, Wi‑Fi ou USB) muda o caminho.
+    </div>
+    <details style="margin-top:10px">
+      <summary class="muted" style="cursor:pointer">❓ Qual adaptador eu tenho? (importante)</summary>
+      <div class="muted" style="margin-top:8px;line-height:1.6">
+        • <b>Bluetooth clássico</b> (o mais comum e barato, pareia como “OBDII”, PIN 1234) — <u>não funciona no navegador</u>.
+        Precisa do app Android nativo (próxima fase).<br>
+        • <b>Bluetooth LE / 4.0</b> — funciona aqui pelo botão “Bluetooth (BLE)”.<br>
+        • <b>Wi‑Fi</b> (cria rede “WiFi_OBDII”, IP 192.168.0.10) — precisa do app desktop (próxima fase).<br>
+        • <b>USB / cabo</b> — funciona aqui pelo botão “USB (Serial)”.
+      </div>
+    </details>
+  </section>
+
+  <div class="tabs">
+    <div class="tab active" data-tab="dtc">Falhas</div>
+    <div class="tab" data-tab="live">Dados ao vivo</div>
+    <div class="tab" data-tab="console">Console</div>
+  </div>
+
+  <!-- FALHAS -->
+  <section class="card tabpanel" data-panel="dtc">
+    <h2>⚠️ Códigos de falha (DTC)</h2>
+    <div class="btn-row" style="margin-bottom:12px">
+      <button class="btn primary" id="btnRead" disabled>🔍 Ler falhas</button>
+      <button class="btn danger" id="btnClear" disabled>🧹 Limpar falhas</button>
+    </div>
+    <div id="dtcList">
+      <div class="empty"><div class="big">🚗</div>Conecte e toque em <b>Ler falhas</b> para escanear os módulos do veículo.</div>
+    </div>
+  </section>
+
+  <!-- LIVE -->
+  <section class="card tabpanel hide" data-panel="live">
+    <h2>📊 Dados ao vivo do motor</h2>
+    <div class="btn-row" style="margin-bottom:12px">
+      <button class="btn primary" id="btnLive" disabled>▶ Iniciar leitura</button>
+      <button class="btn ghost" id="btnLiveStop" disabled>⏸ Parar</button>
+    </div>
+    <div class="grid" id="liveGrid">
+      <div class="g"><div class="lbl">Rotação</div><div class="val" id="pidRPM">—<small> rpm</small></div></div>
+      <div class="g"><div class="lbl">Velocidade</div><div class="val" id="pidSPD">—<small> km/h</small></div></div>
+      <div class="g"><div class="lbl">Temp. motor</div><div class="val" id="pidECT">—<small> °C</small></div></div>
+      <div class="g"><div class="lbl">Carga motor</div><div class="val" id="pidLOAD">—<small> %</small></div></div>
+      <div class="g"><div class="lbl">Borboleta</div><div class="val" id="pidTPS">—<small> %</small></div></div>
+      <div class="g"><div class="lbl">Adm. de ar</div><div class="val" id="pidIAT">—<small> °C</small></div></div>
+      <div class="g"><div class="lbl">Tensão bateria</div><div class="val" id="pidVOLT">—<small> V</small></div></div>
+      <div class="g"><div class="lbl">Avanço ignição</div><div class="val" id="pidADV">—<small> °</small></div></div>
+    </div>
+  </section>
+
+  <!-- CONSOLE -->
+  <section class="card tabpanel hide" data-panel="console">
+    <h2>🖥️ Console ELM327 <span class="muted" style="font-weight:400">(comandos AT / respostas)</span></h2>
+    <div class="btn-row" style="margin-bottom:10px">
+      <input id="cmdInput" placeholder="ex.: ATRV, 03, 0100" style="flex:1 1 160px;background:#0b1424;border:1px solid var(--line);color:var(--ink);border-radius:10px;padding:11px 12px;font-family:ui-monospace,monospace">
+      <button class="btn" id="cmdSend" disabled>Enviar</button>
+      <button class="btn ghost" id="cmdClearLog">Limpar log</button>
+    </div>
+    <div id="console"></div>
+  </section>
+
+  <footer>
+    Protótipo NIPI OBD · funciona no computador e no Android (Chrome). Sempre com o carro parado e freio de mão.
+  </footer>
+</div>
+
+<script>
+"use strict";
+/* =========================================================================
+   NIPI OBD — Protótipo de scanner OBD-II / ELM327
+   - Transporte: Demo (simulador), BLE (Web Bluetooth), Serial (Web Serial/USB)
+   - Modos OBD: 03 (falhas), 07 (pendentes), 0A (permanentes), 04 (limpar), 01 (dados)
+   - Decodificação de DTC genérica + dicionário PT-BR focado em Fiat Mobi
+   ========================================================================= */
+
+/* ---------- Dicionário de DTCs (PT-BR) ---------- */
+/* sev: bad=grave, warn=atenção, info=informativo */
+const DTC_DB = {
+  // --- Motor / injeção (P) ---
+  "P0000":{d:"Nenhuma falha registrada",s:"info"},
+  "P0100":{d:"Sensor de fluxo de ar (MAF) — circuito",s:"warn"},
+  "P0105":{d:"Sensor de pressão do coletor (MAP) — circuito",s:"warn"},
+  "P0110":{d:"Sensor de temperatura do ar admitido — circuito",s:"warn"},
+  "P0115":{d:"Sensor de temperatura do líquido de arrefecimento — circuito",s:"warn"},
+  "P0120":{d:"Sensor de posição da borboleta (TPS) — circuito",s:"warn"},
+  "P0130":{d:"Sonda lambda (sensor O₂) banco 1 — circuito",s:"warn"},
+  "P0135":{d:"Aquecedor da sonda lambda banco 1 — circuito",s:"warn"},
+  "P0171":{d:"Sistema muito pobre (banco 1) — pouca gasolina / entrada de ar falsa",s:"warn"},
+  "P0172":{d:"Sistema muito rico (banco 1) — excesso de combustível",s:"warn"},
+  "P0201":{d:"Circuito do bico injetor — cilindro 1",s:"warn"},
+  "P0230":{d:"Circuito da bomba de combustível",s:"warn"},
+  "P0300":{d:"Falha de combustão (misfire) em vários cilindros",s:"bad"},
+  "P0301":{d:"Falha de combustão — cilindro 1",s:"bad"},
+  "P0302":{d:"Falha de combustão — cilindro 2",s:"bad"},
+  "P0303":{d:"Falha de combustão — cilindro 3",s:"bad"},
+  "P0304":{d:"Falha de combustão — cilindro 4",s:"bad"},
+  "P0313":{d:"Falha de combustão com nível baixo de combustível",s:"warn"},
+  "P0325":{d:"Sensor de detonação (knock) — circuito",s:"warn"},
+  "P0335":{d:"Sensor de rotação (virabrequim/CKP) — circuito",s:"bad"},
+  "P0340":{d:"Sensor de fase (comando/CMP) — circuito",s:"warn"},
+  "P0420":{d:"Eficiência do catalisador abaixo do limite (banco 1)",s:"warn"},
+  "P0442":{d:"Vazamento pequeno no sistema EVAP (verifique a tampa do tanque)",s:"info"},
+  "P0455":{d:"Vazamento grande no EVAP (tampa do tanque solta/faltando)",s:"info"},
+  "P0480":{d:"Relé/eletroventilador do radiador — circuito 1",s:"warn"},
+  "P0500":{d:"Sensor de velocidade do veículo (VSS) — circuito",s:"warn"},
+  "P0505":{d:"Sistema de marcha lenta (IAC) — falha",s:"warn"},
+  "P0562":{d:"Tensão do sistema baixa",s:"warn"},
+  "P0563":{d:"Tensão do sistema alta",s:"warn"},
+  "P0601":{d:"Erro interno de memória do módulo (ECU)",s:"bad"},
+  "P0627":{d:"Controle da bomba de combustível — circuito aberto",s:"warn"},
+  "P1000":{d:"Monitores de emissão ainda não concluídos (rodar mais)",s:"info"},
+  "P1610":{d:"Fiat/Marelli — código imobilizador / anti-furto",s:"warn"},
+  // --- Chassi / ABS (C) ---
+  "C0035":{d:"Sensor de velocidade da roda dianteira esquerda",s:"warn"},
+  "C0040":{d:"Sensor de velocidade da roda dianteira direita",s:"warn"},
+  "C0045":{d:"Sensor de velocidade da roda traseira esquerda",s:"warn"},
+  "C0050":{d:"Sensor de velocidade da roda traseira direita",s:"warn"},
+  "C0110":{d:"Circuito da bomba/motor do módulo ABS",s:"bad"},
+  "C0121":{d:"Válvula de controle do ABS — falha",s:"bad"},
+  "C1400":{d:"Fiat — sinal de sensor de roda irregular / ABS",s:"warn"},
+  // --- Carroceria / Airbag (B) ---
+  "B0001":{d:"Airbag do motorista — circuito (fase 1)",s:"bad"},
+  "B0010":{d:"Airbag do passageiro — circuito",s:"bad"},
+  "B0020":{d:"Airbag lateral esquerdo — circuito",s:"bad"},
+  "B0028":{d:"Airbag lateral direito — circuito",s:"bad"},
+  "B0051":{d:"Pré-tensionador do cinto — motorista",s:"bad"},
+  "B1901":{d:"Fiat — módulo do airbag / crash detectado",s:"bad"},
+  // --- Rede / comunicação (U) ---
+  "U0001":{d:"Barramento CAN de alta velocidade — falha de comunicação",s:"warn"},
+  "U0100":{d:"Perda de comunicação com o módulo do motor (ECM/PCM)",s:"bad"},
+  "U0121":{d:"Perda de comunicação com o módulo do ABS",s:"warn"},
+  "U0155":{d:"Perda de comunicação com o painel de instrumentos",s:"warn"},
+  "U1601":{d:"Fiat — erro de comunicação body computer",s:"warn"},
+};
+
+/* Decodifica 2 bytes (A,B) num código DTC textual (P/C/B/U) */
+function bytesToDTC(a, b){
+  const sys = ["P","C","B","U"][(a & 0xC0) >> 6];
+  const d1 = (a & 0x30) >> 4;
+  const d2 = (a & 0x0F).toString(16).toUpperCase();
+  const d3 = ((b & 0xF0) >> 4).toString(16).toUpperCase();
+  const d4 = (b & 0x0F).toString(16).toUpperCase();
+  return sys + d1 + d2 + d3 + d4;
+}
+/* Descrição estrutural quando o código não está no dicionário */
+function structuralHint(code){
+  const sys = code[0];
+  const base = {P:"Motor / trem de força",C:"Chassi (freios/ABS/direção)",B:"Carroceria (airbag/conforto)",U:"Rede de comunicação (CAN)"}[sys] || "Desconhecido";
+  const generic = code[1] === "0" ? "código genérico OBD-II" : "código específico do fabricante (Fiat)";
+  return {d:`${base} — ${generic}. Consulte a tabela de reparo.`, s: sys==="B"||sys==="C" ? "bad":"warn"};
+}
+function lookupDTC(code){ return DTC_DB[code] || structuralHint(code); }
+
+/* ---------- Camada de transporte ---------- */
+class Transport {
+  constructor(){ this.onLine=()=>{}; this.connected=false; }
+  async connect(){throw "n/a";}
+  async disconnect(){}
+  async send(cmd){throw "n/a";}      // envia comando, resolve com texto de resposta (até o prompt '>')
+  get kind(){return "base";}
+}
+
+/* Simulador: reproduz um Fiat Mobi com falhas de ABS, airbag e motor */
+class SimTransport extends Transport {
+  get kind(){return "sim";}
+  async connect(){ this.connected=true; await wait(300); return true; }
+  async disconnect(){ this.connected=false; }
+  async send(cmd){
+    cmd = cmd.trim().toUpperCase().replace(/\s+/g,"");
+    await wait(120 + Math.random()*180);
+    // AT commands
+    if(cmd.startsWith("AT")){
+      if(cmd==="ATZ") return "ELM327 v1.5";
+      if(cmd==="ATRV") return (13.8 + (Math.random()*0.4-0.2)).toFixed(1)+"V";
+      if(cmd==="ATDPN") return "A6"; // CAN 11/500
+      return "OK";
+    }
+    // 0100 supported PIDs
+    if(cmd==="0100") return "41 00 BE 3F A8 13";
+    // Mode 01 live PIDs
+    if(cmd.startsWith("01")){
+      const pid = cmd.slice(2,4);
+      const s = SIM_STATE;
+      const map = {
+        "04": ()=>`41 04 ${hx(Math.round(s.load*255/100))}`,
+        "05": ()=>`41 05 ${hx(s.ect+40)}`,
+        "0C": ()=>{const v=Math.round(s.rpm*4);return `41 0C ${hx(v>>8)} ${hx(v&0xFF)}`;},
+        "0D": ()=>`41 0D ${hx(s.spd)}`,
+        "0E": ()=>`41 0E ${hx(Math.round((s.adv+64)*2))}`,
+        "0F": ()=>`41 0F ${hx(s.iat+40)}`,
+        "11": ()=>`41 11 ${hx(Math.round(s.tps*255/100))}`,
+        "42": ()=>{const v=Math.round(s.volt*1000);return `41 42 ${hx(v>>8)} ${hx(v&0xFF)}`;},
+      };
+      return map[pid] ? map[pid]() : "NO DATA";
+    }
+    // Mode 03 — falhas armazenadas (P0300 motor, C0035 ABS, B0001 airbag, U0100 rede)
+    if(cmd==="03"){ return SIM_STATE.cleared ? "43 00" : "43 04 03 00 40 35 80 01 C1 00"; }
+    if(cmd==="07") return SIM_STATE.cleared ? "47 00" : "47 01 01 71"; // pendente P0171
+    if(cmd==="0A") return "4A 01 03 00";                                 // permanente P0300
+    if(cmd==="04"){ SIM_STATE.cleared=true; return "44"; }
+    return "NO DATA";
+  }
+}
+
+/* Web Bluetooth (apenas adaptadores BLE) */
+class BleTransport extends Transport {
+  get kind(){return "ble";}
+  async connect(){
+    if(!navigator.bluetooth) throw "Este navegador não suporta Web Bluetooth.";
+    // UUIDs comuns em clones ELM327 BLE
+    const SVC=[0xFFF0, 0xFFE0, "6e400001-b5a3-f393-e0a9-e50e24dcca9e"];
+    this.device = await navigator.bluetooth.requestDevice({
+      filters:[{services:[0xFFF0]},{services:[0xFFE0]},{namePrefix:"OBD"},{namePrefix:"IOS-Vlink"},{namePrefix:"Vlink"}],
+      optionalServices:SVC
+    });
+    const server = await this.device.gatt.connect();
+    let svc, chars;
+    for(const u of SVC){ try{ svc = await server.getPrimaryService(u); if(svc) break; }catch(e){} }
+    if(!svc) throw "Serviço BLE do adaptador não encontrado.";
+    chars = await svc.getCharacteristics();
+    this.write = chars.find(c=>c.properties.write||c.properties.writeWithoutResponse);
+    this.notify = chars.find(c=>c.properties.notify);
+    if(!this.write||!this.notify) throw "Características BLE de leitura/escrita não encontradas.";
+    this._buf="";
+    await this.notify.startNotifications();
+    this.notify.addEventListener("characteristicvaluechanged",(e)=>{
+      const txt = new TextDecoder().decode(e.target.value); this._buf += txt;
+      if(this._buf.includes(">")){ const r=this._buf.replace(/>/g,""); this._buf=""; this._resolve && this._resolve(r.trim()); }
+    });
+    this.device.addEventListener("gattserverdisconnected",()=>{ this.connected=false; onTransportLost(); });
+    this.connected=true; return true;
+  }
+  async disconnect(){ try{ this.device.gatt.disconnect(); }catch(e){} this.connected=false; }
+  send(cmd){
+    return new Promise(async (resolve,reject)=>{
+      this._resolve=resolve; this._buf="";
+      const data = new TextEncoder().encode(cmd.trim()+"\r");
+      try{
+        if(this.write.properties.writeWithoutResponse) await this.write.writeValueWithoutResponse(data);
+        else await this.write.writeValue(data);
+      }catch(e){ reject(e); }
+      setTimeout(()=>{ if(this._resolve===resolve){ this._resolve=null; resolve(this._buf.replace(/>/g,"").trim()||"TIMEOUT"); } },4000);
+    });
+  }
+}
+
+/* Web Serial (USB / conversores) */
+class SerialTransport extends Transport {
+  get kind(){return "serial";}
+  async connect(){
+    if(!("serial" in navigator)) throw "Este navegador não suporta Web Serial.";
+    this.port = await navigator.serial.requestPort();
+    await this.port.open({baudRate:38400});
+    this.reader = this.port.readable.getReader();
+    this.encoder = new TextEncoder();
+    this.writer = this.port.writable.getWriter();
+    this._buf=""; this._pump();
+    this.connected=true; return true;
+  }
+  async _pump(){
+    const dec = new TextDecoder();
+    try{
+      while(this.connected!==false){
+        const {value,done}=await this.reader.read(); if(done) break;
+        this._buf += dec.decode(value,{stream:true});
+        if(this._buf.includes(">") && this._resolve){ const r=this._buf.replace(/>/g,""); this._buf=""; const rs=this._resolve; this._resolve=null; rs(r.trim()); }
+      }
+    }catch(e){ onTransportLost(); }
+  }
+  async disconnect(){ this.connected=false; try{await this.reader.cancel();}catch(e){} try{this.writer.releaseLock();}catch(e){} try{await this.port.close();}catch(e){} }
+  send(cmd){
+    return new Promise(async(resolve)=>{
+      this._resolve=resolve; this._buf="";
+      await this.writer.write(this.encoder.encode(cmd.trim()+"\r"));
+      setTimeout(()=>{ if(this._resolve===resolve){ this._resolve=null; resolve(this._buf.replace(/>/g,"").trim()||"TIMEOUT"); } },4000);
+    });
+  }
+}
+
+/* ---------- Estado do simulador ---------- */
+const SIM_STATE = { rpm:820, spd:0, ect:92, iat:34, load:24, tps:14, volt:13.9, adv:9, cleared:false };
+function simTick(){
+  const s=SIM_STATE, drive=Math.sin(Date.now()/3000);
+  s.rpm = Math.round(820 + Math.max(0,drive)*2600 + (Math.random()*80-40));
+  s.spd = Math.max(0, Math.round(Math.max(0,drive)*74));
+  s.tps = Math.round(12 + Math.max(0,drive)*70);
+  s.load= Math.round(20 + Math.max(0,drive)*55);
+  s.ect = Math.min(99, s.ect + (s.ect<92?0.2:0) - 0.05);
+  s.adv = Math.round(8 + Math.max(0,drive)*22);
+  s.volt= +(13.9 + (Math.random()*0.3-0.15)).toFixed(1);
+}
+
+/* ---------- App ---------- */
+let T = null;                    // transporte ativo
+let liveTimer=null, simTimer=null;
+const $ = s=>document.querySelector(s);
+const wait = ms=>new Promise(r=>setTimeout(r,ms));
+const hx = n=>Math.max(0,Math.min(255,n|0)).toString(16).toUpperCase().padStart(2,"0");
+
+function log(kind,txt){
+  const c=$("#console"); const cls={tx:"tx",rx:"rx",sy:"sy",er:"er"}[kind]||"sy";
+  const pre={tx:"» ",rx:"« ",sy:"· ",er:"✕ "}[kind]||"";
+  const span=document.createElement("span"); span.className=cls; span.textContent=pre+txt+"\n";
+  c.appendChild(span); c.scrollTop=c.scrollHeight;
+}
+function setStatus(state,text){
+  const d=$("#statusDot"); d.className="dot"+(state==="on"?" on":state==="sim"?" on sim":"");
+  $("#statusText").textContent=text;
+}
+function setConnectedUI(on,kind){
+  $("#btnDisc").classList.toggle("hide",!on);
+  ["#btnRead","#btnClear","#btnLive","#cmdSend"].forEach(s=>$(s).disabled=!on);
+  $("#btnDemo").disabled=on; $("#btnBle").disabled=on; $("#btnSerial").disabled=on;
+  if(on){ setStatus(kind==="sim"?"sim":"on", kind==="sim"?"Demonstração":"Conectado ("+kind.toUpperCase()+")"); }
+  else { setStatus("off","Desconectado"); }
+}
+
+/* envia um comando e loga */
+async function cmd(c){
+  log("tx",c);
+  const r = await T.send(c);
+  r.split(/\r?\n/).forEach(l=>l.trim()&&log("rx",l.trim()));
+  return r;
+}
+
+/* inicialização ELM327 */
+async function initElm(){
+  for(const c of ["ATZ","ATE0","ATL0","ATS1","ATH0","ATSP0"]){ await cmd(c); }
+  const v = await cmd("ATRV");         // tensão da bateria
+  const volt = parseFloat((v.match(/([\d.]+)V/)||[])[1]);
+  if(!isNaN(volt)) $("#pidVOLT").innerHTML = volt.toFixed(1)+"<small> V</small>";
+}
+
+async function connect(transport){
+  try{
+    T = transport;
+    log("sy","Conectando ("+T.kind+")...");
+    await T.connect();
+    setConnectedUI(true,T.kind);
+    log("sy","Conectado. Inicializando ELM327...");
+    await initElm();
+    log("sy","Pronto. Toque em ‘Ler falhas’.");
+    if(T.kind==="sim"){ simTimer=setInterval(simTick,700); }
+  }catch(e){
+    log("er","Falha na conexão: "+e);
+    alert("Não foi possível conectar: "+e+"\n\nDica: adaptadores Bluetooth clássicos e Wi‑Fi não funcionam no navegador — veja ‘Qual adaptador eu tenho?’.");
+    T=null; setConnectedUI(false,"");
+  }
+}
+function onTransportLost(){ log("er","Conexão perdida."); teardown(); }
+function teardown(){
+  if(liveTimer){clearInterval(liveTimer);liveTimer=null;}
+  if(simTimer){clearInterval(simTimer);simTimer=null;}
+  setConnectedUI(false,""); $("#btnLive").disabled=true; $("#btnLiveStop").disabled=true;
+}
+async function disconnect(){ try{ await T.disconnect(); }catch(e){} log("sy","Desconectado."); teardown(); T=null; }
+
+/* ----- Parse de DTCs de um modo (03/07/0A) ----- */
+function parseDTCs(resp, respPrefix){
+  // remove espaços/quebras, procura o prefixo de resposta (43/47/4A)
+  const codes=[];
+  resp.split(/\r?\n/).forEach(line=>{
+    let h=line.replace(/[^0-9A-Fa-f]/g,"").toUpperCase();
+    let idx=h.indexOf(respPrefix);
+    if(idx<0) return;
+    h=h.slice(idx+respPrefix.length);
+    // Em CAN o 1º byte após o prefixo é a contagem de DTCs; ignoramos e lemos pares
+    // Heurística: se sobrar nº ímpar de bytes, o 1º é contagem
+    let bytes=[]; for(let i=0;i+1<h.length;i+=2) bytes.push(parseInt(h.substr(i,2),16));
+    if(bytes.length%2===1) bytes=bytes.slice(1);
+    for(let i=0;i+1<bytes.length;i+=2){
+      const a=bytes[i],b=bytes[i+1];
+      if(a===0&&b===0) continue;
+      codes.push(bytesToDTC(a,b));
+    }
+  });
+  return [...new Set(codes)];
+}
+
+async function readFaults(){
+  $("#btnRead").disabled=true;
+  $("#dtcList").innerHTML='<div class="empty"><div class="big">⏳</div>Escaneando módulos (motor, ABS, airbag, rede)...</div>';
+  try{
+    const stored = parseDTCs(await cmd("03"),"43");
+    const pending = parseDTCs(await cmd("07"),"47");
+    const permanent = parseDTCs(await cmd("0A"),"4A");
+    renderFaults(stored,pending,permanent);
+  }catch(e){ log("er","Erro ao ler falhas: "+e); $("#dtcList").innerHTML='<div class="empty">Erro ao ler falhas: '+e+'</div>'; }
+  $("#btnRead").disabled=false;
+}
+
+function renderFaults(stored,pending,permanent){
+  const all=[];
+  stored.forEach(c=>all.push({c,t:"stored"}));
+  pending.forEach(c=>{ if(!stored.includes(c)) all.push({c,t:"pending"}); });
+  permanent.forEach(c=>{ if(!stored.includes(c)&&!pending.includes(c)) all.push({c,t:"permanent"}); });
+
+  if(all.length===0){
+    $("#dtcList").innerHTML='<div class="empty"><div class="big">✅</div>Nenhuma falha encontrada nos módulos consultados.</div>';
+    log("sy","Nenhum DTC."); return;
+  }
+  const badge={stored:'<span class="badge stored">armazenado</span>',pending:'<span class="badge pending">pendente</span>',permanent:'<span class="badge permanent">permanente</span>'};
+  $("#dtcList").innerHTML = all.map(({c,t})=>{
+    const info=lookupDTC(c);
+    return `<div class="dtc sev-${info.s}">
+      <div class="code">${c}</div>
+      <div class="desc">${info.d} ${badge[t]}</div>
+      <div class="meta">Sistema: ${({P:"Motor/Powertrain",C:"Chassi",B:"Carroceria",U:"Rede CAN"})[c[0]]||"—"}</div>
+    </div>`;
+  }).join("");
+  log("sy",`Encontrados ${all.length} DTC(s): ${all.map(x=>x.c).join(", ")}`);
+}
+
+async function clearFaults(){
+  if(!confirm("Isto apaga os códigos de falha da memória do veículo.\nA luz pode voltar se o defeito ainda existir.\n\nDeseja continuar?")) return;
+  await cmd("04");
+  $("#dtcList").innerHTML='<div class="empty"><div class="big">🧹</div>Falhas apagadas. Rode o carro e leia de novo para confirmar.</div>';
+  log("sy","Comando de limpeza (Modo 04) enviado.");
+}
+
+/* ----- Dados ao vivo (Modo 01) ----- */
+const LIVE_PIDS=[
+  {pid:"0C",el:"#pidRPM",u:" rpm",f:(a,b)=>Math.round(((a*256)+b)/4)},
+  {pid:"0D",el:"#pidSPD",u:" km/h",f:a=>a},
+  {pid:"05",el:"#pidECT",u:" °C",f:a=>a-40},
+  {pid:"04",el:"#pidLOAD",u:" %",f:a=>Math.round(a*100/255)},
+  {pid:"11",el:"#pidTPS",u:" %",f:a=>Math.round(a*100/255)},
+  {pid:"0F",el:"#pidIAT",u:" °C",f:a=>a-40},
+  {pid:"42",el:"#pidVOLT",u:" V",f:(a,b)=>(((a*256)+b)/1000).toFixed(1)},
+  {pid:"0E",el:"#pidADV",u:" °",f:a=>Math.round(a/2-64)},
+];
+function parsePid(resp,pid){
+  const h=resp.replace(/[^0-9A-Fa-f]/g,"").toUpperCase();
+  const key="41"+pid;
+  const i=h.indexOf(key); if(i<0) return null;
+  const a=parseInt(h.substr(i+4,2),16); const b=parseInt(h.substr(i+6,2),16);
+  return {a:isNaN(a)?0:a,b:isNaN(b)?0:b};
+}
+async function livePoll(){
+  for(const p of LIVE_PIDS){
+    try{
+      const r=await T.send("01"+p.pid);
+      const v=parsePid(r,p.pid); if(!v) continue;
+      const val=p.f(v.a,v.b);
+      $(p.el).innerHTML = val+"<small>"+p.u+"</small>";
+    }catch(e){}
+  }
+}
+function startLive(){
+  $("#btnLive").disabled=true; $("#btnLiveStop").disabled=false;
+  liveTimer=setInterval(livePoll,600); livePoll();
+  log("sy","Leitura ao vivo iniciada.");
+}
+function stopLive(){
+  if(liveTimer){clearInterval(liveTimer);liveTimer=null;}
+  $("#btnLive").disabled=false; $("#btnLiveStop").disabled=true;
+  log("sy","Leitura ao vivo parada.");
+}
+
+/* ---------- UI wiring ---------- */
+document.querySelectorAll(".tab").forEach(t=>t.addEventListener("click",()=>{
+  document.querySelectorAll(".tab").forEach(x=>x.classList.remove("active"));
+  t.classList.add("active");
+  const name=t.dataset.tab;
+  document.querySelectorAll(".tabpanel").forEach(p=>p.classList.toggle("hide",p.dataset.panel!==name));
+}));
+$("#btnDemo").addEventListener("click",()=>connect(new SimTransport()));
+$("#btnBle").addEventListener("click",()=>connect(new BleTransport()));
+$("#btnSerial").addEventListener("click",()=>connect(new SerialTransport()));
+$("#btnDisc").addEventListener("click",disconnect);
+$("#btnRead").addEventListener("click",readFaults);
+$("#btnClear").addEventListener("click",clearFaults);
+$("#btnLive").addEventListener("click",startLive);
+$("#btnLiveStop").addEventListener("click",stopLive);
+$("#cmdSend").addEventListener("click",async()=>{ const v=$("#cmdInput").value.trim(); if(v){ await cmd(v); $("#cmdInput").value=""; } });
+$("#cmdInput").addEventListener("keydown",e=>{ if(e.key==="Enter") $("#cmdSend").click(); });
+$("#cmdClearLog").addEventListener("click",()=>$("#console").innerHTML="");
+
+// feature detection nos botões
+if(!navigator.bluetooth){ $("#btnBle").title="Web Bluetooth indisponível neste navegador"; }
+if(!("serial" in navigator)){ $("#btnSerial").title="Web Serial indisponível neste navegador"; }
+setStatus("off","Desconectado");
+log("sy","NIPI OBD pronto. Use ‘Modo Demonstração’ para testar agora.");
+</script>
+</body>
+</html>
