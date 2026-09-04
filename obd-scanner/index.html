@@ -107,6 +107,7 @@
     <h2>🔌 Conexão</h2>
     <div class="btn-row">
       <button class="btn primary" id="btnDemo">▶ Modo Demonstração</button>
+      <button class="btn hide" id="btnBt">📲 Bluetooth (app Android)</button>
       <button class="btn" id="btnBle">📶 Bluetooth (BLE)</button>
       <button class="btn" id="btnSerial">🔗 USB (Serial)</button>
       <button class="btn ghost danger hide" id="btnDisc">Desconectar</button>
@@ -394,6 +395,34 @@ class SerialTransport extends Transport {
   }
 }
 
+/* Bluetooth CLÁSSICO (SPP) — só dentro do app Android (plugin cordova-plugin-bluetooth-serial).
+   É o caminho para os adaptadores baratos que pareiam como "OBDII" (PIN 1234). */
+class BtSppTransport extends Transport {
+  get kind(){return "bt";}
+  async connect(){
+    const bs = window.bluetoothSerial;
+    if(!bs) throw "Disponível apenas dentro do app Android (plugin Bluetooth).";
+    const devices = await new Promise((res,rej)=>bs.list(res,rej));
+    const dev = (devices||[]).find(d=>/obd|elm|v-?link|viecar/i.test(d.name||"")) || (devices||[])[0];
+    if(!dev) throw "Nenhum adaptador pareado. Pareie o ‘OBDII’ nas configurações Bluetooth do Android (PIN 1234).";
+    this._addr = dev.address || dev.id;
+    log("sy","Conectando a "+(dev.name||this._addr)+"...");
+    await new Promise((res,rej)=>bs.connect(this._addr, res, (e)=>{ this.connected ? onTransportLost() : rej(e||"Falha ao conectar"); }));
+    this.connected=true;
+    bs.subscribe(">", (data)=>{ if(this._resolve){ const r=this._resolve; this._resolve=null; r(String(data).replace(/>/g,"").trim()); } }, ()=>{});
+    return true;
+  }
+  async disconnect(){ const bs=window.bluetoothSerial; this.connected=false; try{bs.unsubscribe(()=>{},()=>{});}catch(e){} await new Promise(r=>{ try{bs.disconnect(r,r);}catch(e){r();} }); }
+  send(cmd){
+    const bs=window.bluetoothSerial;
+    return new Promise((resolve)=>{
+      this._resolve=resolve;
+      bs.write(cmd.trim()+"\r", ()=>{}, ()=>{});
+      setTimeout(()=>{ if(this._resolve===resolve){ this._resolve=null; resolve("TIMEOUT"); } },4000);
+    });
+  }
+}
+
 /* ---------- Estado do simulador ---------- */
 const SIM_STATE = { rpm:820, spd:0, ect:92, iat:34, load:24, tps:14, volt:13.9, adv:9, cleared:false };
 function simTick(){
@@ -582,6 +611,7 @@ document.querySelectorAll(".tab").forEach(t=>t.addEventListener("click",()=>{
   document.querySelectorAll(".tabpanel").forEach(p=>p.classList.toggle("hide",p.dataset.panel!==name));
 }));
 $("#btnDemo").addEventListener("click",()=>connect(new SimTransport()));
+$("#btnBt").addEventListener("click",()=>connect(new BtSppTransport()));
 $("#btnBle").addEventListener("click",()=>connect(new BleTransport()));
 $("#btnSerial").addEventListener("click",()=>connect(new SerialTransport()));
 $("#btnDisc").addEventListener("click",disconnect);
@@ -594,6 +624,11 @@ $("#cmdInput").addEventListener("keydown",e=>{ if(e.key==="Enter") $("#cmdSend")
 $("#cmdClearLog").addEventListener("click",()=>$("#console").innerHTML="");
 
 // feature detection nos botões
+if(window.bluetoothSerial){ // rodando dentro do app Android
+  $("#btnBt").classList.remove("hide");
+  $("#btnBle").classList.add("hide"); $("#btnSerial").classList.add("hide");
+  $("#connNote").innerHTML="<b>App Android.</b> Pareie o adaptador ‘OBDII’ nas configurações do Android (PIN 1234) e toque em <b>Bluetooth (app Android)</b>.";
+}
 if(!navigator.bluetooth){ $("#btnBle").title="Web Bluetooth indisponível neste navegador"; }
 if(!("serial" in navigator)){ $("#btnSerial").title="Web Serial indisponível neste navegador"; }
 setStatus("off","Desconectado");

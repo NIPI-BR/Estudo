@@ -1,0 +1,6 @@
+# dependências e projeto nativo gerado (recriados com os comandos do BUILD-ANDROID.md)
+node_modules/
+android/
+www/
+*.apk
+.DS_Store

@@ -1,0 +1,21 @@
+{
+  "name": "nipi-obd-android",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Casco Android (Capacitor) do scanner NIPI OBD — Bluetooth clássico com ELM327",
+  "scripts": {
+    "prepare-web": "node -e \"require('fs').mkdirSync('www',{recursive:true});require('fs').copyFileSync('../index.html','www/index.html');console.log('www/index.html atualizado a partir de ../index.html')\"",
+    "add:android": "npm run prepare-web && npx cap add android",
+    "sync": "npm run prepare-web && npx cap sync",
+    "open:android": "npx cap open android",
+    "run:android": "npm run prepare-web && npx cap run android"
+  },
+  "dependencies": {
+    "@capacitor/android": "^6.1.2",
+    "@capacitor/core": "^6.1.2",
+    "cordova-plugin-bluetooth-serial": "^0.4.7"
+  },
+  "devDependencies": {
+    "@capacitor/cli": "^6.1.2"
+  }
+}

@@ -32,11 +32,18 @@ qualquer carro OBD‑II. Roda **no computador e no Android** (Chrome) a partir d
 | `index.html` | O app completo (um arquivo só, sem dependências). |
 | `DIAGNOSTICO-FIAT-MOBI.md` | Pesquisa: luzes do painel, protocolo ELM327, tipos de adaptador, DTCs comuns. |
 
+## App Android (Bluetooth clássico)
+
+O adaptador que pareia como “OBDII” (PIN 1234) é **Bluetooth clássico** e não funciona no
+navegador. A pasta [`android-app/`](android-app/) empacota **este mesmo app** como Android via
+**Capacitor**, com o canal Bluetooth clássico (`BtSppTransport` no `index.html`). Para gerar o
+APK, veja [`android-app/BUILD-ANDROID.md`](android-app/BUILD-ANDROID.md).
+
 ## Próximas fases
 
-- App **Android nativo** (Bluetooth clássico — a maioria dos adaptadores).
-- App **desktop** (Wi‑Fi / USB, com exportação de relatório).
-- Integração com o **sistema de som / multimídia** do carro.
+- ✅ App **Android** (Bluetooth clássico) — projeto Capacitor em `android-app/` (falta compilar o APK numa máquina com Android Studio).
+- ⏳ App **desktop** (Wi‑Fi / USB, com exportação de relatório).
+- ⏳ Integração com o **sistema de som / multimídia** do carro.
 
 > ⚠️ Uso educativo. Faça diagnósticos com o carro **parado e freio de mão**. Apagar falhas não
 > conserta o defeito — se ele persistir, a luz volta.

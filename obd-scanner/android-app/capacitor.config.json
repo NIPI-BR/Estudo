@@ -1,0 +1,8 @@
+{
+  "appId": "com.nipi.obd",
+  "appName": "NIPI OBD",
+  "webDir": "www",
+  "android": {
+    "allowMixedContent": true
+  }
+}
